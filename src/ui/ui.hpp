@@ -27,12 +27,16 @@ struct UI final : RendererUI
     TimeBar::Ptr time_bar_relative;
 
     std::vector<ActivityButton::Ptr> activities;
+    std::vector<float> activities_time;
+    size_t current_activity{0};
+    float start_time{0.0f};
+    sf::Clock clock;
 
     Blur background_blur;
 
     UI(Vec2f const render_size_, pez::ResourcesStore const& store_)
         : RendererUI{render_size_, store_}
-        , font{getFontRegular()}
+        , font{getFontMedium()}
         , background_blur{Vec2u{render_size_}}
     {
         // Create the root widget, parent of all widgets
@@ -47,30 +51,46 @@ struct UI final : RendererUI
         initializeUI();
     }
 
+    void updateTime()
+    {
+        activities_time[current_activity] += clock.getElapsedTime().asSeconds();
+        clock.restart();
+    }
+
     void render(pez::RenderContext& context) override
     {
+        updateTime();
         auto const& blur_texture = background_blur.apply(context);
 
         sf::RenderStates states;
         states.texture = &blur_texture;
 
         root->update(pez::App::getDt());
+        time_bar_global->times = activities_time;
         context.draw(*root, states);
     }
 
     void initializeUI()
     {
+        size_t const activity_count = 4;
+
         float current_y = ui::margin;
         Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
-        time_bar_global = root->createChild<TimeBar>(font, time_bar_size);
+        time_bar_global = root->createChild<TimeBar>(font, time_bar_size, activity_count);
         time_bar_global->setPosition({ui::margin, current_y});
         current_y += ui::margin + time_bar_height;
 
-        time_bar_relative = root->createChild<TimeBar>(font, time_bar_size);
+        time_bar_relative = root->createChild<TimeBar>(font, time_bar_size, activity_count);
         time_bar_relative->setPosition({ui::margin, current_y});
         current_y += ui::margin + time_bar_height;
 
-        size_t const activity_count = 4;
+        std::array<sf::Color, 4> palette{
+            sf::Color{239, 71, 111},
+            sf::Color{255, 209, 102},
+            sf::Color{6, 214, 160},
+            sf::Color{17, 138, 178}
+        };
+
         auto const activity_count_f = static_cast<float>(activity_count);
         float const activity_height = m_render_size.y - current_y - ui::margin;
         float const activity_width = (m_render_size.x - ui::margin * (activity_count_f + 1.0f)) / activity_count_f;
@@ -80,9 +100,16 @@ struct UI final : RendererUI
             float const y = current_y;
             float const x = ui::margin + static_cast<float>(i) * (activity_width + ui::margin);
             activity->setPosition({x, y});
+            activity->on_activate = [this, i]() {
+                activate(i);
+            };
+            activity->background.setFillColor(palette[i]);
             activities.push_back(activity);
         }
 
+        activities_time.resize(activity_count, 0.0f);
+        
+        activities[0]->activate();
     }
 
     void scaleWidgets(Vec2f const scale) const
@@ -107,5 +134,16 @@ struct UI final : RendererUI
     void onMouseMove(Vec2f const mouse_position) const
     {
         root->mouseMove(mouse_position);
+    }
+
+    void activate(size_t const activity_idx)
+    {
+        if (activity_idx == current_activity) {
+            return;
+        }
+
+        activities[current_activity]->deactivate();
+        current_activity = activity_idx;
+        activities[current_activity]->activate();
     }
 };
