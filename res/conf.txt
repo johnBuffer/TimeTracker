@@ -1,0 +1,11 @@
+# The window size
+window_size = 2560, 1440
+# Window mode
+fullscreen = 0
+# The number of threads to use for the simulation (avoid using 1, it can currently deadlock)
+thread_count = 16
+
+# The number of agents in the simulation
+population_size = 1000
+
+env_size = 1600, 1600

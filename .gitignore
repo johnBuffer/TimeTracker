@@ -1,0 +1,7 @@
+.DS_Store
+
+cmake-build-*/
+.idea/
+.PVS-Studio/
+__std_test__*
+python_env/
