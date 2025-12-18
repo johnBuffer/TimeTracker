@@ -46,7 +46,7 @@ struct DayOverviewBar final : ui::Widget
         float const day_seconds = 3600.0f * 24.0f;
 
         //chart_texture.clear(background.background.color);
-        chart_texture.clear({80, 80, 80});
+        chart_texture.clear({50, 50, 50});
         auto const createSlot = [&](float const start_time, float const end_time, sf::Color const color) {
             float const  x_start   = width * (start_time / day_seconds);
             float const  x_end     = width * (end_time / day_seconds);
