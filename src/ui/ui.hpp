@@ -106,7 +106,7 @@ struct UI final : RendererUI
         float const activity_width = (m_render_size.x - ui::margin * (activity_count_f + 1.0f)) / activity_count_f;
         Vec2f const activity_size = {activity_width, activity_height};
         for (size_t i = 0; i < activity_count; ++i) {
-            auto const activity = root->createChild<ActivityButton>(font, activity_size);
+            auto const activity = root->createChild<ActivityButton>(m_resources, activity_size);
             float const y = current_y;
             float const x = ui::margin + static_cast<float>(i) * (activity_width + ui::margin);
             activity->setPosition({x, y});

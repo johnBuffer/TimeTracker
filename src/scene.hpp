@@ -17,6 +17,7 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
         // Fonts
         m_resources.registerFont("res/roboto_regular.ttf", "font_regular");
         m_resources.registerFont("res/roboto_medium.ttf", "font_medium");
+        m_resources.registerFont("res/roboto_mono_semi.ttf", "font_mono");
     }
 
     /// Creates the scene's events

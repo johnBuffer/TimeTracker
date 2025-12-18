@@ -11,16 +11,20 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
 
     std::string activity_label;
 
-    sf::Font const& font;
+    sf::Font const& font_title;
+    sf::Font const& font_timer;
     pez::CardOutlined background;
 
     float duration = 0.0f;
 
     explicit
-    ActivityBackground(sf::Font const& font_, Vec2f const size_)
-        : font{font_}
+    ActivityBackground(pez::ResourcesStore const& store, Vec2f const size_)
+        : font_title{*store.getFont("font_medium")}
+        , font_timer{*store.getFont("font_mono")}
         , background{ui::createBackground(size_)}
-    {}
+    {
+
+    }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override
     {
@@ -59,7 +63,7 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
 
     void drawTitle(sf::RenderTarget& target, sf::RenderStates const& states) const
     {
-        sf::Text title{font, activity_label, 256};
+        sf::Text title{font_title, activity_label, 256};
         title.setScale(text_scale);
         title.setFillColor(pez::setAlpha(sf::Color::White, 200));
         auto const bounds = title.getLocalBounds();
@@ -70,16 +74,22 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
 
     void drawDuration(sf::RenderTarget& target, sf::RenderStates const& states) const
     {
-        float const seconds = std::fmod(duration, 60.0f);
-        float const minutes = seconds / 60.0f;
-        float const hours   = minutes / 60.0f;
-        std::string const duration_str = std::format("{:0>2.0f}:{:0>2.0f}:{:0>2.0f}", hours, minutes, seconds);
-
-        sf::Text text{font, duration_str, 200};
+        sf::Text text{font_timer, "00:00:00", 200};
         text.setScale(text_scale);
         text.setFillColor(pez::setAlpha(sf::Color::White, 150));
         auto const bounds = text.getLocalBounds();
         text.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, 0.0f});
+
+        auto const    seconds = static_cast<int32_t>(duration);
+        int32_t const minutes = seconds / 60;
+        int32_t const hours   = minutes / 60;
+        std::string const duration_str = std::format(
+            "{:0>2}:{:0>2}:{:0>2}",
+            hours,
+            minutes % 60,
+            seconds % 60);
+
+        text.setString(duration_str);
 
         Vec2f const size = getSize();
         text.setPosition(size * 0.5f);
@@ -115,10 +125,10 @@ struct ActivityButton final : ui::Widget
     ActivityBackground background;
 
     explicit
-    ActivityButton(sf::Font const& font_, Vec2f const size_)
+    ActivityButton(pez::ResourcesStore const& store, Vec2f const size_)
         : ui::Widget{size_}
-        , font{font_}
-        , background{font_, size_}
+        , font{*store.getFont("font_medium")}
+        , background{store, size_}
     {
         Vec2f const background_size = background.getSize();
         background.setOrigin(background_size * 0.5f);
