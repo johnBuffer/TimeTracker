@@ -2,6 +2,8 @@
 #include <chrono>
 #include <vector>
 
+#include "peztool/utils/binary_io.hpp"
+
 
 struct Date
 {
@@ -41,6 +43,12 @@ struct Date
         return static_cast<float>(hour * 3600 + minute * 60 + second) + static_cast<float>(millisecond) / 1000.0f;
     }
 
+    [[nodiscard]]
+    bool isSame(Date const& other) const
+    {
+        return (year == other.year) && (month == other.month) && (day == other.day) && (hour == other.hour) && (minute == other.minute) && (second == other.second);
+    }
+
     static Date now()
     {
         auto const now = std::chrono::zoned_time{std::chrono::current_zone(), std::chrono::system_clock::now()};
@@ -70,15 +78,39 @@ struct History
     {
         Date   date{};
         size_t activity_idx{0};
+
+        [[nodiscard]]
+        bool isSame(TimePoint const& other) const
+        {
+            return (activity_idx == other.activity_idx) && date.isSame(other.date);
+        }
+
+        [[nodiscard]]
+        std::string toString() const
+        {
+            return std::format("{} {} {} {} {} {} {}",
+                date.year,
+                date.month,
+                date.day,
+                date.hour,
+                date.minute,
+                date.second,
+                activity_idx
+            );
+        }
     };
 
     std::vector<TimePoint> entries;
 
     History()
     {
-        Date midnight = Date::now();
-        midnight.setTime(0, 0, 0);
-        addEntry(midnight, 0);
+        entries = load(getCurrentSaveFile());
+        // No entry, create the midnight default entry
+        if (entries.empty()) {
+            Date midnight = Date::now();
+            midnight.setTime(0, 0, 0);
+            addEntry(midnight, 0);
+        }
     }
 
     void addEntry(Date const& date, size_t const activity_idx)
@@ -103,5 +135,84 @@ struct History
             result += getSlotDuration(entries.back().date, Date::now());
         }
         return result;
+    }
+
+    void saveToFile() const
+    {
+        std::string const current_file = getCurrentSaveFile();
+
+        size_t const entry_count = entries.size();
+        size_t save_from_idx = 0;
+        if (std::filesystem::exists(current_file)) {
+            std::cout << "Save found for today, appending" << std::endl;
+            auto const last_data = load(current_file).back();
+            for (; save_from_idx < entry_count; ++save_from_idx) {
+                if (entries[save_from_idx].date.getTimeAsSeconds() > last_data.date.getTimeAsSeconds()) {
+                    break;
+                }
+            }
+        } else {
+            std::cout << "No file found, creating a new one" << std::endl;
+        }
+
+        std::cout << "Saving from idx " << save_from_idx << std::endl;
+        std::ofstream file(current_file, std::ios::app);
+        for (size_t i{save_from_idx}; i < entry_count; ++i) {
+            file << entries[i].toString() << '\n';
+        }
+        file.close();
+    }
+
+    [[nodiscard]]
+    static std::vector<TimePoint> load(std::string const& filename)
+    {
+        std::vector<TimePoint> data;
+
+        std::ifstream file(filename);
+
+        if (file.is_open()) {
+            std::string line;
+            while (std::getline(file, line)) {
+                auto const time_point = loadFromString(line);
+                if (time_point) {
+                    data.push_back(*time_point);
+                }
+            }
+            file.close();
+        } else {
+            std::cerr << "Unable to open file" << std::endl;
+        }
+        return data;
+    }
+
+    [[nodiscard]]
+    static std::optional<TimePoint> loadFromString(std::string const& line)
+    {
+        std::stringstream stream(line);
+
+        int32_t payload;
+        std::vector<int32_t> data;
+
+        // Extract all integers
+        while (stream >> payload) {
+            data.push_back(payload);
+        }
+
+        if (data.size() != 7) {
+            std::cout << "Incorrect string, aborting" << std::endl;
+            return std::nullopt;
+        }
+
+        TimePoint result;
+        result.date = Date{data[0], static_cast<uint32_t>(data[1]), static_cast<uint32_t>(data[2]), data[3], data[4], data[5], 0};
+        result.activity_idx = data[6];
+        return result;
+    }
+
+    [[nodiscard]]
+    static std::string getCurrentSaveFile()
+    {
+        auto const now = Date::now();
+        return std::format("{}{:0>2}{:0>2}.txt", now.year, now.month, now.day);
     }
 };

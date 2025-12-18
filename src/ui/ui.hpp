@@ -105,7 +105,7 @@ struct UI final : RendererUI
             float const y = current_y;
             float const x = ui::margin + static_cast<float>(i) * (activity_width + ui::margin);
             activity->setPosition({x, y});
-            activity->on_activate = [this, i]() {
+            activity->on_activate = [this, i] {
                 activate(i);
             };
             activity->background.setFillColor(palette[i]);
@@ -113,7 +113,7 @@ struct UI final : RendererUI
             activities.push_back(activity);
         }
 
-        activities[0]->activate();
+        activities[history.entries.back().activity_idx]->activate();
     }
 
     void scaleWidgets(Vec2f const scale) const

@@ -27,9 +27,6 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
             pez::App::exit();
         };
         handler.addCallback(on_closed);
-        handler.onKeyPressed(sf::Keyboard::Key::Escape, [&](sf::Event::KeyPressed) {
-            pez::App::exit();
-        });
 
         std::function on_focus_lost = [](sf::Event::FocusLost const&) {
             pez::App::setFramerateLimit(20);
@@ -40,6 +37,14 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
             pez::App::enableVSync();
         };
         handler.addCallback(on_focus);
+
+        handler.onKeyPressed(sf::Keyboard::Key::Escape, [&](sf::Event::KeyPressed) {
+            pez::App::exit();
+        });
+
+        handler.onKeyPressed(sf::Keyboard::Key::Enter, [&](sf::Event::KeyPressed) {
+            getRenderer<UI>().history.saveToFile();
+        });
 
         handler.onMouseMoved([&](sf::Event::MouseMoved const&)
         {
