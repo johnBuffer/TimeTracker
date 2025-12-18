@@ -62,6 +62,7 @@ struct TimeBar final : ui::Widget
             float const width = (durations[i] / total_time) * total_width;
             pez::Card time_slot{{width, height}, ui::background_radius - margin, palette[i]};
             time_slot.setPosition({current_x, margin});
+            time_slot.shadow_offset = {0.0f, 2.0f};
             target.draw(time_slot, states);
             current_x += width + margin;
         }
