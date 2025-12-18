@@ -67,6 +67,9 @@ struct UI final : RendererUI
 
         root->update(pez::App::getDt());
         time_bar_global->times = activities_time;
+        for (size_t i = 0; i < activities.size(); ++i) {
+            activities[i]->background.duration = activities_time[i];
+        }
         context.draw(*root, states);
     }
 
@@ -84,11 +87,18 @@ struct UI final : RendererUI
         time_bar_relative->setPosition({ui::margin, current_y});
         current_y += ui::margin + time_bar_height;
 
-        std::array<sf::Color, 4> palette{
+        std::array palette{
             sf::Color{239, 71, 111},
             sf::Color{255, 209, 102},
             sf::Color{6, 214, 160},
             sf::Color{17, 138, 178}
+        };
+
+        std::array labels{
+            "Activity 0",
+            "Activity 1",
+            "Activity 2",
+            "Activity 3",
         };
 
         auto const activity_count_f = static_cast<float>(activity_count);
@@ -104,11 +114,11 @@ struct UI final : RendererUI
                 activate(i);
             };
             activity->background.setFillColor(palette[i]);
+            activity->background.activity_label = labels[i];
             activities.push_back(activity);
         }
 
         activities_time.resize(activity_count, 0.0f);
-        
         activities[0]->activate();
     }
 

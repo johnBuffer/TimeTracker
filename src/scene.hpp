@@ -30,6 +30,10 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
             pez::App::exit();
         });
 
+        std::function on_focus = [](sf::Event::FocusLost const&) {
+        };
+        handler.addCallback(on_focus);
+
         handler.onMouseMoved([&](sf::Event::MouseMoved const&)
         {
             auto const& renderer = getRenderer<UI>();

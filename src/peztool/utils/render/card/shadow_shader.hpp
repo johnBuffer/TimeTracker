@@ -6,12 +6,13 @@
 
 struct ShadowShader
 {
-    static sf::Shader const* get(float const ratio, float const radius, Vec2f const scale)
+    static sf::Shader const* get(float const ratio, float const radius, Vec2f const scale, sf::Color const color = sf::Color::Black)
     {
         static ShadowShader s_instance;
         s_instance.m_shader.setUniform("u_ratio", ratio);
         s_instance.m_shader.setUniform("u_radius", radius);
         s_instance.m_shader.setUniform("u_scale", scale);
+        s_instance.setColor(color);
         return &s_instance.m_shader;
     }
 
@@ -24,12 +25,19 @@ private:
         }
     }
 
+    void setColor(sf::Color const color)
+    {
+        float constexpr norm = 1.0f / 255.0f;
+        m_shader.setUniform("u_color", pez::getVec3<Vec3f>(color) * norm);
+    }
+
     sf::Shader m_shader;
 
     static constexpr std::string_view s_src = R"(
     uniform float u_ratio;
     uniform float u_radius;
     uniform vec2  u_scale;
+    uniform vec3  u_color;
 
     float rectangleDistance(vec2 p, vec2 size, vec2 pos)
     {
@@ -56,6 +64,6 @@ private:
         float dist = rectangleDistance(uv, size - shadow_from_size, center);
 
         float alpha = 1.0 - smoothstep(radius - remaining_shadow, radius + shadow_size + shadow_from_size, dist);
-        gl_FragColor = vec4(vec3(0.0), 0.5 * pow(alpha, 3.0));
+        gl_FragColor = vec4(u_color, 0.5 * pow(alpha, 3.0));
     })";
 };

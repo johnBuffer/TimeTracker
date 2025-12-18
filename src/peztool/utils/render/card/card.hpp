@@ -21,7 +21,7 @@ struct Card : public sf::Drawable, public sf::Transformable
 
     float     shadow_size   = 8.0f;
     Vec2f     shadow_offset = {0.0f, 0.0f};
-    float     softness = 0.0f;
+    sf::Color shadow_color = sf::Color::Black;
 
     uint32_t quality = 64;
     bool blur_background = false;
@@ -90,7 +90,11 @@ struct Card : public sf::Drawable, public sf::Transformable
             Vec2f const quad_size = getShadowQuadSize();
             states_shadow.transform.translate(shadow_offset);
             states_shadow.transform.translate(size * 0.5f);
-            states_shadow.shader = ShadowShader::get(quad_size.x / quad_size.y, corner_radius / quad_size.y, quad_size.componentWiseDiv(size));
+            states_shadow.shader = ShadowShader::get(
+                quad_size.x / quad_size.y,
+                corner_radius / quad_size.y,
+                quad_size.componentWiseDiv(size),
+                shadow_color);
             target.draw(va_shadow, states_shadow);
         }
 
