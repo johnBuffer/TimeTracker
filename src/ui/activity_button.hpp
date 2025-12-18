@@ -1,7 +1,11 @@
 #pragma once
+#include "peztool/utils/color_utils.hpp"
+#include "peztool/utils/interpolation/standard_interpolated_value.hpp"
 #include "standard/widget.hpp"
 
 #include "./ui_common.hpp"
+#include "./history.hpp"
+
 
 
 struct ActivityBackground : public sf::Transformable, public sf::Drawable
@@ -14,6 +18,7 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
     sf::Font const& font_title;
     sf::Font const& font_timer;
     pez::CardOutlined background;
+
 
     float duration = 0.0f;
 
@@ -63,18 +68,18 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
 
     void drawTitle(sf::RenderTarget& target, sf::RenderStates const& states) const
     {
-        sf::Text title{font_title, activity_label, 256};
+        sf::Text title{font_title, activity_label, 200};
         title.setScale(text_scale);
         title.setFillColor(pez::setAlpha(sf::Color::White, 200));
         auto const bounds = title.getLocalBounds();
-        title.setOrigin({bounds.size.x * 0.5f, 0.0f});
+        title.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, 0.0f});
         title.setPosition({getSize().x * 0.5f, ui::margin});
         target.draw(title, states);
     }
 
     void drawDuration(sf::RenderTarget& target, sf::RenderStates const& states) const
     {
-        sf::Text text{font_timer, "00:00:00", 200};
+        sf::Text text{font_timer, "00:00:00", 150};
         text.setScale(text_scale);
         text.setFillColor(pez::setAlpha(sf::Color::White, 150));
         auto const bounds = text.getLocalBounds();
@@ -109,10 +114,13 @@ struct ActivityButton final : ui::Widget
     };
 
     // State
-    State state = State::Idle;
+    State  state = State::Idle;
+    size_t activity_idx;
 
     // Render info
     sf::Font const& font;
+
+    History const* history;
 
     pez::InterpolatedFloat highlight_offset;
     pez::InterpolatedFloat highlight_scale;
@@ -125,9 +133,11 @@ struct ActivityButton final : ui::Widget
     ActivityBackground background;
 
     explicit
-    ActivityButton(pez::ResourcesStore const& store, Vec2f const size_)
+    ActivityButton(pez::ResourcesStore const& store, Vec2f const size_, size_t const activity_idx_, History const& history_)
         : ui::Widget{size_}
+        , activity_idx{activity_idx_}
         , font{*store.getFont("font_medium")}
+        , history{&history_}
         , background{store, size_}
     {
         Vec2f const background_size = background.getSize();
@@ -159,7 +169,6 @@ struct ActivityButton final : ui::Widget
             float const height = background_height;
             background.setOutlineThickness(outline, true);
             background.setSize({size->x, height});
-
         }
         float const offset = highlight_offset;
         Vec2f const background_size = *size;
@@ -167,9 +176,11 @@ struct ActivityButton final : ui::Widget
         background.setShadowOffset({0.0f, 10.0f - offset});
         float const scale = highlight_scale;
         background.setScale({scale, scale});
+
+        background.duration = history->getDuration(activity_idx);
     }
 
-    void onDraw(sf::RenderTarget& target, sf::RenderStates states) const override
+    void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
     {
         float constexpr led_radius = 10.0f;
         float constexpr led_offset = 40.0f;
@@ -188,7 +199,7 @@ struct ActivityButton final : ui::Widget
         pez::Card led{2.0f * Vec2f{led_radius, led_radius}, led_radius, sf::Color::Green};
         led.shadow_color = sf::Color::Green;
         led.setShadowSize(16.0f);
-        led.setPosition(text.getPosition() - Vec2f{bounds.size.x * ActivityBackground::text_scale_f * 0.5f + led_offset, 0.0f});
+        led.setPosition(text.getPosition() - Vec2f{bounds.size.x * ActivityBackground::text_scale_f * 0.5f + led_offset, 8.0f});
         target.draw(led, states);
 
         target.draw(background, states);

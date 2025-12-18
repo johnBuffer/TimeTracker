@@ -134,6 +134,13 @@ public:
         GlobalInstance<App>::instance->m_frame_rate_unlocked = false;
     }
 
+    static void enableVSync()
+    {
+        GlobalInstance<App>::instance->m_frame_rate_unlocked = true;
+        GlobalInstance<App>::instance->m_window.setFramerateLimit(120);
+        GlobalInstance<App>::instance->m_window.setVerticalSyncEnabled(true);
+    }
+
     [[nodiscard]]
     static bool isFramerateUnlocked()
     {

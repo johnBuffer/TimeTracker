@@ -1,11 +1,10 @@
 #pragma once
+#include "./activity_button.hpp"
+#include "./day_overview_bar.hpp"
+#include "./time_bar.hpp"
 #include "peztool/core/system.hpp"
 #include "peztool/utils/render/blur/blur.hpp"
-
 #include "standard/drawer.hpp"
-
-#include "./activity_button.hpp"
-#include "./time_bar.hpp"
 
 
 using EntitiesUI = pez::RequiredEntity<>;
@@ -23,14 +22,14 @@ struct UI final : RendererUI
 
     ui::Widget::Ptr root{nullptr};
 
+    History history;
+
     TimeBar::Ptr time_bar_global;
-    TimeBar::Ptr time_bar_relative;
+    DayOverviewBar::Ptr day_overview_bar;
 
     std::vector<ActivityButton::Ptr> activities;
-    std::vector<float> activities_time;
     size_t current_activity{0};
     float start_time{0.0f};
-    sf::Clock clock;
 
     Blur background_blur;
 
@@ -53,41 +52,36 @@ struct UI final : RendererUI
 
     void updateTime()
     {
-        activities_time[current_activity] += clock.getElapsedTime().asSeconds();
-        clock.restart();
     }
 
     void render(pez::RenderContext& context) override
     {
         updateTime();
-        auto const& blur_texture = background_blur.apply(context);
+        //auto const& blur_texture = background_blur.apply(context);
 
         sf::RenderStates states;
-        states.texture = &blur_texture;
+        //states.texture = &blur_texture;
 
         root->update(pez::App::getDt());
-        time_bar_global->times = activities_time;
-        for (size_t i = 0; i < activities.size(); ++i) {
-            activities[i]->background.duration = activities_time[i];
-        }
         context.draw(*root, states);
     }
 
     void initializeUI()
     {
-        size_t const activity_count = 4;
+        size_t const activity_count = 5;
 
         float current_y = ui::margin;
         Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
-        time_bar_global = root->createChild<TimeBar>(font, time_bar_size, activity_count);
+        time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, activity_count);
         time_bar_global->setPosition({ui::margin, current_y});
         current_y += ui::margin + time_bar_height;
 
-        time_bar_relative = root->createChild<TimeBar>(font, time_bar_size, activity_count);
-        time_bar_relative->setPosition({ui::margin, current_y});
+        day_overview_bar = root->createChild<DayOverviewBar>(font, time_bar_size, history);
+        day_overview_bar->setPosition({ui::margin, current_y});
         current_y += ui::margin + time_bar_height;
 
         std::array palette{
+            sf::Color{120, 120, 120},
             sf::Color{239, 71, 111},
             sf::Color{255, 209, 102},
             sf::Color{6, 214, 160},
@@ -95,10 +89,11 @@ struct UI final : RendererUI
         };
 
         std::array labels{
-            "Activity 0",
+            "Nothing",
             "Activity 1",
             "Activity 2",
             "Activity 3",
+            "Activity 4",
         };
 
         auto const activity_count_f = static_cast<float>(activity_count);
@@ -106,7 +101,7 @@ struct UI final : RendererUI
         float const activity_width = (m_render_size.x - ui::margin * (activity_count_f + 1.0f)) / activity_count_f;
         Vec2f const activity_size = {activity_width, activity_height};
         for (size_t i = 0; i < activity_count; ++i) {
-            auto const activity = root->createChild<ActivityButton>(m_resources, activity_size);
+            auto const activity = root->createChild<ActivityButton>(m_resources, activity_size, i, history);
             float const y = current_y;
             float const x = ui::margin + static_cast<float>(i) * (activity_width + ui::margin);
             activity->setPosition({x, y});
@@ -118,7 +113,6 @@ struct UI final : RendererUI
             activities.push_back(activity);
         }
 
-        activities_time.resize(activity_count, 0.0f);
         activities[0]->activate();
     }
 
@@ -155,5 +149,6 @@ struct UI final : RendererUI
         activities[current_activity]->deactivate();
         current_activity = activity_idx;
         activities[current_activity]->activate();
+        history.addEntry(Date::now(), current_activity);
     }
 };

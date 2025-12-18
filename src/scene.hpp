@@ -1,8 +1,8 @@
 #pragma once
 #include "peztool/core/scene.hpp"
-#include "peztool/utils/watcher.hpp"
 
 #include "ui/ui.hpp"
+#include "./history.hpp"
 
 
 using Entities = pez::EntityPack<>;
@@ -31,7 +31,13 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
             pez::App::exit();
         });
 
-        std::function on_focus = [](sf::Event::FocusLost const&) {
+        std::function on_focus_lost = [](sf::Event::FocusLost const&) {
+            pez::App::setFramerateLimit(20);
+        };
+        handler.addCallback(on_focus_lost);
+
+        std::function on_focus = [](sf::Event::FocusGained const&) {
+            pez::App::enableVSync();
         };
         handler.addCallback(on_focus);
 
@@ -63,6 +69,7 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
     /// This is executed after all systems have been loaded
     void onInitialized() override
     {
+        pez::App::enableVSync();
         m_render_context->setClearColor({80, 80, 80});
     }
 
