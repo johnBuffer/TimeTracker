@@ -19,8 +19,8 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
     sf::Font const& font_timer;
     pez::CardOutlined background;
 
-
     float duration = 0.0f;
+    float percent = 0.0f;
 
     explicit
     ActivityBackground(pez::ResourcesStore const& store, Vec2f const size_)
@@ -71,10 +71,22 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
         sf::Text title{font_title, activity_label, 200};
         title.setScale(text_scale);
         title.setFillColor(pez::setAlpha(sf::Color::White, 200));
-        auto const bounds = title.getLocalBounds();
-        title.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, 0.0f});
+        {
+            auto const bounds = title.getLocalBounds();
+            title.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, 0.0f});
+        }
         title.setPosition({getSize().x * 0.5f, ui::margin});
         target.draw(title, states);
+
+        sf::Text percent_label{font_timer, std::format("{:.0f}%", percent), 100};
+        percent_label.setScale(text_scale);
+        percent_label.setFillColor(pez::setAlpha(sf::Color::White, 200));
+        {
+            auto const bounds = percent_label.getLocalBounds();
+            percent_label.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, 0.0f});
+            percent_label.setPosition({getSize().x * 0.5f, getSize().y - ui::margin - bounds.size.y * text_scale_f});
+        }
+        target.draw(percent_label, states);
     }
 
     void drawDuration(sf::RenderTarget& target, sf::RenderStates const& states) const
@@ -178,6 +190,7 @@ struct ActivityButton final : ui::Widget
         background.setScale({scale, scale});
 
         background.duration = history->getDuration(activity_idx);
+        background.percent = (background.duration / Date::now().getTimeAsSeconds()) * 100.0f;
     }
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
@@ -191,7 +204,6 @@ struct ActivityButton final : ui::Widget
         text.setOrigin(bounds.position + bounds.size * 0.5f);
 
         float const text_offset = size->y - background.getSize().y;
-
         text.setPosition({size->x * 0.5f + led_offset * 0.25f, size->y * 0.7f + text_offset});
         text.setFillColor(pez::setAlpha(sf::Color::White, 200));
         target.draw(text, states);

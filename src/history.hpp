@@ -113,8 +113,17 @@ struct History
         }
     }
 
+    ~History()
+    {
+        saveToFile();
+    }
+
     void addEntry(Date const& date, size_t const activity_idx)
     {
+        // It's useless to add multiple times the same activity
+        if (!entries.empty() && entries.back().activity_idx == activity_idx) {
+            return;
+        }
         entries.emplace_back(date, activity_idx);
     }
 
@@ -135,6 +144,13 @@ struct History
             result += getSlotDuration(entries.back().date, Date::now());
         }
         return result;
+    }
+
+    [[nodiscard]]
+    float getDurationPercent(size_t const activity_idx) const
+    {
+        float const current_seconds = Date::now().getTimeAsSeconds();
+        return (getDuration(activity_idx) / current_seconds) * 100.0f;
     }
 
     void saveToFile() const

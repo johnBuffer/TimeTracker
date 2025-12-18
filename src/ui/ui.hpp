@@ -1,11 +1,15 @@
 #pragma once
+
+#include "peztool/core/system.hpp"
+#include "peztool/utils/render/blur/blur.hpp"
+
+#include "standard/drawer.hpp"
+#include "standard/text_label.hpp"
+
 #include "./activity_button.hpp"
 #include "./day_overview_bar.hpp"
 #include "./time_bar.hpp"
-#include "peztool/core/system.hpp"
-#include "peztool/utils/render/blur/blur.hpp"
-#include "standard/drawer.hpp"
-
+#include "./activity_container.hpp"
 
 using EntitiesUI = pez::RequiredEntity<>;
 using ProcessorsUI = pez::RequiredSystems<>;
@@ -24,12 +28,13 @@ struct UI final : RendererUI
 
     History history;
 
+    TextLabel::Ptr timer_label;
+    TextLabel::Ptr day_overview_label;
     TimeBar::Ptr time_bar_global;
     DayOverviewBar::Ptr day_overview_bar;
 
-    std::vector<ActivityButton::Ptr> activities;
+    ActivityContainer::Ptr activity_container;
     size_t current_activity{0};
-    float start_time{0.0f};
 
     Blur background_blur;
 
@@ -68,17 +73,36 @@ struct UI final : RendererUI
 
     void initializeUI()
     {
+        int32_t const label_size = 32;
+        float const label_x = ui::margin + 0.5f * ui::background_radius;
+        sf::Color constexpr label_color = pez::setAlpha(sf::Color::White, 200);
+
         size_t const activity_count = 5;
 
         float current_y = ui::margin;
+
+        timer_label = root->createChild<TextLabel>(font);
+        timer_label->setString("Distribution");
+        timer_label->setPosition({label_x, current_y});
+        timer_label->setCharacterSize(label_size);
+        timer_label->setFillColor(label_color);
+        current_y += 0.35f * ui::margin + timer_label->size->y;
+
         Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
         time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, activity_count);
         time_bar_global->setPosition({ui::margin, current_y});
-        current_y += ui::margin + time_bar_height;
+        current_y += 0.75f * ui::margin + time_bar_height;
+
+        day_overview_label = root->createChild<TextLabel>(font);
+        day_overview_label->setString("Overview");
+        day_overview_label->setPosition({label_x, current_y});
+        day_overview_label->setCharacterSize(label_size);
+        day_overview_label->setFillColor(label_color);
+        current_y += 0.35f * ui::margin + day_overview_label->size->y;
 
         day_overview_bar = root->createChild<DayOverviewBar>(font, time_bar_size, history);
         day_overview_bar->setPosition({ui::margin, current_y});
-        current_y += ui::margin + time_bar_height;
+        current_y += 1.5f * ui::margin + time_bar_height;
 
         std::array palette{
             sf::Color{120, 120, 120},
@@ -96,13 +120,20 @@ struct UI final : RendererUI
             "Activity 4",
         };
 
+        Vec2f const activity_container_size = {
+            m_render_size.x - 2.0f * ui::margin,
+            m_render_size.y - ui::margin - current_y
+        };
+        activity_container = root->createChild<ActivityContainer>(activity_container_size);
+        activity_container->setPosition({ui::margin, current_y});
+
         auto const activity_count_f = static_cast<float>(activity_count);
-        float const activity_height = m_render_size.y - current_y - ui::margin;
-        float const activity_width = (m_render_size.x - ui::margin * (activity_count_f + 1.0f)) / activity_count_f;
+        float const activity_height = activity_container_size.y - 2.0f * ui::margin;
+        float const activity_width = (activity_container_size.x - ui::margin * (activity_count_f + 1.0f)) / activity_count_f;
         Vec2f const activity_size = {activity_width, activity_height};
         for (size_t i = 0; i < activity_count; ++i) {
-            auto const activity = root->createChild<ActivityButton>(m_resources, activity_size, i, history);
-            float const y = current_y;
+            auto const activity = activity_container->createChild<ActivityButton>(m_resources, activity_size, i, history);
+            float const y = ui::margin;
             float const x = ui::margin + static_cast<float>(i) * (activity_width + ui::margin);
             activity->setPosition({x, y});
             activity->on_activate = [this, i] {
@@ -110,10 +141,9 @@ struct UI final : RendererUI
             };
             activity->background.setFillColor(palette[i]);
             activity->background.activity_label = labels[i];
-            activities.push_back(activity);
         }
 
-        activities[history.entries.back().activity_idx]->activate();
+        activity_container->getButton(history.entries.back().activity_idx)->activate();
     }
 
     void scaleWidgets(Vec2f const scale) const
@@ -146,9 +176,9 @@ struct UI final : RendererUI
             return;
         }
 
-        activities[current_activity]->deactivate();
+        activity_container->getButton(current_activity)->deactivate();
         current_activity = activity_idx;
-        activities[current_activity]->activate();
+        activity_container->getButton(current_activity)->activate();
         history.addEntry(Date::now(), current_activity);
     }
 };

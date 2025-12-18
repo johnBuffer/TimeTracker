@@ -246,6 +246,12 @@ struct Widget : sf::Drawable, sf::Transformable
         return size->componentWiseMul(getScale());
     }
 
+    template<typename TWidget>
+    std::shared_ptr<TWidget> getTypedChild(size_t const idx)
+    {
+        return std::dynamic_pointer_cast<TWidget>(children[idx]);
+    }
+
 private:
     bool m_clicked = false;
     bool m_descendant_clicked = false;
