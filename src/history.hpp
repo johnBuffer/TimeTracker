@@ -185,7 +185,6 @@ struct History
         std::vector<TimePoint> data;
 
         std::ifstream file(filename);
-
         if (file.is_open()) {
             std::string line;
             while (std::getline(file, line)) {
@@ -196,7 +195,7 @@ struct History
             }
             file.close();
         } else {
-            std::cerr << "Unable to open file" << std::endl;
+            std::cout << "No save file found for today, a new one will be created." << std::endl;
         }
         return data;
     }
