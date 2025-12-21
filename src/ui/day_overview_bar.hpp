@@ -77,11 +77,48 @@ struct DayOverviewBar final : ui::Widget
         return true;
     }
 
+    void onMouseMove(Vec2f const pos) override
+    {
+        std::optional<size_t> const current_slot = getSlotIdx(pos.x);
+        if (current_slot) {
+            std::cout << current_slot.value() << std::endl;
+        }
+    }
+
 private:
     [[nodiscard]]
     Vec2f getAvailableSize() const
     {
         float constexpr total_space = 2.0f * ui::element_spacing;
         return *size - Vec2f{total_space, total_space};
+    }
+
+    [[nodiscard]]
+    std::optional<size_t> getSlotIdx(float const x) const
+    {
+        size_t const entry_count = history->entries.size();
+        Vec2f const available_size = getAvailableSize();
+        float constexpr day_seconds = 3600.0f * 24.0f;
+
+        auto const getSlotRangeX = [&](float const start_time, float const end_time) {
+            float const  x_start   = ui::element_spacing + available_size.x * (start_time / day_seconds);
+            float const  x_end     = ui::element_spacing + available_size.x * (end_time / day_seconds);
+            return Vec2f{x_start, x_end};
+        };
+
+        auto const& entries = history->entries;
+        for (size_t i = 0; i < entry_count - 1; ++i) {
+            Vec2f const range = getSlotRangeX(entries[i].date.getTimeAsSeconds(), entries[i + 1].date.getTimeAsSeconds());
+            if (x > range.x && x < range.y) {
+                return i;
+            }
+        }
+
+        Vec2f const last_range = getSlotRangeX(entries.back().date.getTimeAsSeconds(), Date::now().getTimeAsSeconds());
+        if (x > last_range.x && x < last_range.y) {
+            return entry_count - 1;
+        }
+
+        return std::nullopt;
     }
 };

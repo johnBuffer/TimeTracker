@@ -80,6 +80,18 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
 
     void onTick(float dt) override
     {
+        if (!isMouseInWindow()) {
+            auto const& renderer = getRenderer<UI>();
+            renderer.root->mouseExit();
+        }
+    }
 
+    [[nodiscard]]
+    bool isMouseInWindow() const
+    {
+        auto const mouse_position = static_cast<Vec2f>(sf::Mouse::getPosition(m_render_context->getWindow()));
+        Vec2f const window_size = m_render_context->getRenderSize();
+        sf::FloatRect const bounding_box{{}, window_size};
+        return bounding_box.contains(mouse_position);
     }
 };

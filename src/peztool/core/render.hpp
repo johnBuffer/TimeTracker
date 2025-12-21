@@ -284,6 +284,12 @@ public:
         m_clear_color = color;
     }
 
+    [[nodiscard]]
+    sf::Window const& getWindow() const
+    {
+        return m_window;
+    }
+
     /// The mouse button state
     bool mouse_clicked = false;
 

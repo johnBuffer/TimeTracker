@@ -163,7 +163,6 @@ struct Widget : sf::Drawable, sf::Transformable
      */
     virtual void onMouseMove(Vec2f const pos)
     {
-
     }
 
     virtual void onMouseEnter()
