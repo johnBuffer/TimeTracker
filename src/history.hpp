@@ -118,6 +118,7 @@ struct History
         saveToFile();
     }
 
+    /// Adds a new activity entry in the history
     void addEntry(Date const& date, size_t const activity_idx)
     {
         // It's useless to add multiple times the same activity
@@ -127,6 +128,7 @@ struct History
         entries.emplace_back(date, activity_idx);
     }
 
+    /// Returns the total duration of the provided activity
     [[nodiscard]]
     float getDuration(size_t const activity_idx) const
     {
@@ -146,6 +148,7 @@ struct History
         return result;
     }
 
+    /// Given an activity returns its proportion in the day
     [[nodiscard]]
     float getDurationPercent(size_t const activity_idx) const
     {
@@ -153,6 +156,13 @@ struct History
         return (getDuration(activity_idx) / current_seconds) * 100.0f;
     }
 
+    [[nodiscard]]
+    size_t getLastActivityIdx() const
+    {
+        return entries.back().activity_idx;
+    }
+
+    /// Saves the current history to a file
     void saveToFile() const
     {
         std::string const current_file = getCurrentSaveFile();
@@ -179,6 +189,7 @@ struct History
         file.close();
     }
 
+    /// Loads a list of entries from the provided @p filename
     [[nodiscard]]
     static std::vector<TimePoint> load(std::string const& filename)
     {
@@ -200,6 +211,7 @@ struct History
         return data;
     }
 
+    /// Creates an Entry for a string
     [[nodiscard]]
     static std::optional<TimePoint> loadFromString(std::string const& line)
     {
@@ -224,6 +236,7 @@ struct History
         return result;
     }
 
+    /// Returns the save filename for today
     [[nodiscard]]
     static std::string getCurrentSaveFile()
     {

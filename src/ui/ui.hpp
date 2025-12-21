@@ -2,14 +2,15 @@
 
 #include "peztool/core/system.hpp"
 #include "peztool/utils/render/blur/blur.hpp"
-
 #include "standard/drawer.hpp"
 #include "standard/text_label.hpp"
 
+#include "configuration.hpp"
+
 #include "./activity_button.hpp"
+#include "./activity_container.hpp"
 #include "./day_overview_bar.hpp"
 #include "./time_bar.hpp"
-#include "./activity_container.hpp"
 
 using EntitiesUI = pez::RequiredEntity<>;
 using ProcessorsUI = pez::RequiredSystems<>;
@@ -22,11 +23,12 @@ struct UI final : RendererUI
 {
     static float constexpr time_bar_height = 100.0f;
 
+    History& history = pez::Singleton<History>::get();
+    Configuration const& configuration = pez::Singleton<Configuration>::get();
+
     sf::Font const& font;
 
     ui::Widget::Ptr root{nullptr};
-
-    History history;
 
     TextLabel::Ptr timer_label;
     TextLabel::Ptr day_overview_label;
@@ -77,7 +79,7 @@ struct UI final : RendererUI
         float const label_x = ui::margin + 0.5f * ui::background_radius;
         sf::Color constexpr label_color = pez::setAlpha(sf::Color::White, 200);
 
-        size_t const activity_count = 5;
+        size_t const activity_count = configuration.activities.size();
 
         float current_y = ui::margin;
 
@@ -89,7 +91,7 @@ struct UI final : RendererUI
         current_y += 0.35f * ui::margin + timer_label->size->y;
 
         Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
-        time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, activity_count);
+        time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, configuration.activities);
         time_bar_global->setPosition({ui::margin, current_y});
         current_y += 0.75f * ui::margin + time_bar_height;
 
@@ -100,11 +102,11 @@ struct UI final : RendererUI
         day_overview_label->setFillColor(label_color);
         current_y += 0.35f * ui::margin + day_overview_label->size->y;
 
-        day_overview_bar = root->createChild<DayOverviewBar>(font, time_bar_size, history);
+        day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
         day_overview_bar->setPosition({ui::margin, current_y});
         current_y += 1.5f * ui::margin + time_bar_height;
 
-        std::array palette{
+        /*std::array palette{
             sf::Color{120, 120, 120},
             sf::Color{239, 71, 111},
             sf::Color{255, 209, 102},
@@ -118,7 +120,7 @@ struct UI final : RendererUI
             "Activity 2",
             "Activity 3",
             "Activity 4",
-        };
+        };*/
 
         Vec2f const activity_container_size = {
             m_render_size.x - 2.0f * ui::margin,
@@ -132,18 +134,25 @@ struct UI final : RendererUI
         float const activity_width = (activity_container_size.x - ui::margin * (activity_count_f + 1.0f)) / activity_count_f;
         Vec2f const activity_size = {activity_width, activity_height};
         for (size_t i = 0; i < activity_count; ++i) {
-            auto const activity = activity_container->createChild<ActivityButton>(m_resources, activity_size, i, history);
+            Activity const& activity = configuration.activities[i];
+            auto const activity_button = activity_container->createChild<ActivityButton>(m_resources, activity_size, i, history);
             float const y = ui::margin;
             float const x = ui::margin + static_cast<float>(i) * (activity_width + ui::margin);
-            activity->setPosition({x, y});
-            activity->on_activate = [this, i] {
+            activity_button->setPosition({x, y});
+            activity_button->on_activate = [this, i] {
                 activate(i);
             };
-            activity->background.setFillColor(palette[i]);
-            activity->background.activity_label = labels[i];
+            activity_button->background.setFillColor(configuration.activities[i].color);
+            activity_button->background.activity_label = configuration.activities[i].name;
         }
 
-        activity_container->getButton(history.entries.back().activity_idx)->activate();
+        size_t const last_activity = history.getLastActivityIdx();
+        auto const& button = activity_container->getButton(last_activity);
+        if (button) {
+            button->activate();
+        } else {
+            std::cout << std::format("Could not activate activity [{}]", last_activity);
+        }
     }
 
     void scaleWidgets(Vec2f const scale) const

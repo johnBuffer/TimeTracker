@@ -249,7 +249,10 @@ struct Widget : sf::Drawable, sf::Transformable
     template<typename TWidget>
     std::shared_ptr<TWidget> getTypedChild(size_t const idx)
     {
-        return std::dynamic_pointer_cast<TWidget>(children[idx]);
+        if (idx < children.size()) {
+            return std::dynamic_pointer_cast<TWidget>(children[idx]);
+        }
+        return nullptr;
     }
 
 private:

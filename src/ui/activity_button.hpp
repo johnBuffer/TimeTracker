@@ -156,23 +156,27 @@ struct ActivityButton final : ui::Widget
         background.setOrigin(background_size * 0.5f);
         background.setPosition(background_size);
 
-        auto const interpolation_function = pez::InterpolationFunction::EaseInOutQuint;
+        auto constexpr interpolation_function = pez::InterpolationFunction::EaseInOutQuint;
 
         highlight_offset.setInterpolationSpeed(5.0f);
         highlight_offset.setInterpolationFunction(interpolation_function);
         highlight_offset.setValueDirect(0.0f);
+        highlight_offset.useRealtime();
 
         highlight_scale.setInterpolationSpeed(5.0f);
         highlight_scale.setInterpolationFunction(interpolation_function);
         highlight_scale.setValueDirect(1.0f);
+        highlight_scale.useRealtime();
 
         background_height.setInterpolationSpeed(2.0f);
         background_height.setInterpolationFunction(interpolation_function);
         background_height.setValueDirect(size->y);
+        background_height.useRealtime();
 
         outline.setInterpolationSpeed(2.0f);
         outline.setInterpolationFunction(interpolation_function);
         outline.setValueDirect(0.0f);
+        outline.useRealtime();
     }
 
     void onUpdate(float const dt) override

@@ -2,17 +2,25 @@
 #include <filesystem>
 #include <string_view>
 
+inline bool createIfDoesntExist(std::filesystem::path const& path)
+{
+    if (!std::filesystem::exists(path)) {
+        std::filesystem::create_directories(path);
+        return false;
+    }
+    return true;
+}
 
 inline void checkDataDirectory()
 {
-    std::string_view constexpr data_dir_name = "data";
-    if (!std::filesystem::exists(data_dir_name)) {
-        if (std::filesystem::create_directories(data_dir_name)) {
-            std::cout << "Directory created.\n";
-        } else {
-            std::cout << "Failed to create directory.\n";
-        }
+    std::filesystem::path const data_dir_name = "data";
+    std::filesystem::path const history_dir_name = data_dir_name / "history";
+    if (!createIfDoesntExist(data_dir_name)) {
+        // We know that history does not exist
+        std::filesystem::create_directories(history_dir_name);
     } else {
-        std::cout << "Directory already exists.\n";
+        // History might not be there for some reason
+        createIfDoesntExist(history_dir_name);
     }
+    // The correct directories should be created at this point
 }

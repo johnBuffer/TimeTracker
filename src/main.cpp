@@ -13,6 +13,8 @@ int main(int const argc, char* const argv[])
     auto constexpr conf_filename{"conf.txt"};
     // Set working directory
     pez::setWorkingDirectoryToExecutablePath(argv[0]);
+    // Ensure the data directory exists, else create it
+    checkDataDirectory();
     // Create the App
     pez::App app("TimeTracker", conf_filename);
     pez::Singleton<History>::create();
