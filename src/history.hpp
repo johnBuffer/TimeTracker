@@ -37,10 +37,10 @@ struct History
 
     History()
     {
-        entries = load(getCurrentSaveFile());
+        //entries = load(getCurrentSaveFile());
         // No entry, create the midnight default entry
         if (entries.empty()) {
-            addEntry(getMidnight(), 0);
+            addEntry(Date::now(), 0);
         }
     }
 

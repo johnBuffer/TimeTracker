@@ -97,6 +97,7 @@ struct UI final : RendererUI
         size_t const activity_count = configuration.activities.size();
 
         float current_y = ui::margin;
+        Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
 
         /*timer_label = root->createChild<TextLabel>(font);
         timer_label->setString("Distribution");
@@ -105,10 +106,9 @@ struct UI final : RendererUI
         timer_label->setFillColor(label_color);
         current_y += 0.35f * ui::margin + timer_label->size->y;*/
 
-        Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
-        time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, configuration.activities);
+        /*time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, configuration.activities);
         time_bar_global->setPosition({ui::margin, current_y});
-        current_y += ui::margin + time_bar_height;
+        current_y += ui::margin + time_bar_height;*/
 
         /*day_overview_label = root->createChild<TextLabel>(font);
         day_overview_label->setString("Overview");
@@ -117,9 +117,9 @@ struct UI final : RendererUI
         day_overview_label->setFillColor(label_color);
         current_y += 0.35f * ui::margin + day_overview_label->size->y;*/
 
-        /*day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
+        day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
         day_overview_bar->setPosition({ui::margin, current_y});
-        current_y += ui::margin + time_bar_height;*/
+        current_y += ui::margin + time_bar_height;
 
         float const activity_margin = 0.0f;
         Vec2f const activity_container_size = {
@@ -142,7 +142,7 @@ struct UI final : RendererUI
             activity_button->on_activate = [this, i] {
                 activate(i);
             };
-            activity_button->background.target_color = configuration.activities[i].color;
+            activity_button->background.setFillColor(configuration.activities[i].color);
             activity_button->background.activity_label = configuration.activities[i].name;
         }
 

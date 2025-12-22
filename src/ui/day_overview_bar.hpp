@@ -45,18 +45,20 @@ struct DayOverviewBar final : ui::Widget
         pez::QuadVertexArray vertex_array;
 
         Vec2f const available_size = getAvailableSize();
-        float constexpr day_seconds = 3600.0f * 24.0f;
+        float constexpr day_seconds = 30.0f;
+
+        auto const& entries = history->entries;
+        float const first_time = entries.front().date.getTimeAsSeconds();
 
         chart_texture.clear({50, 50, 50});
         auto const createSlot = [&](float const start_time, float const end_time, sf::Color const color) {
-            float const  x_start   = available_size.x * (start_time / day_seconds);
-            float const  x_end     = available_size.x * (end_time / day_seconds);
+            float const  x_start   = available_size.x * ((start_time - first_time) / day_seconds);
+            float const  x_end     = available_size.x * ((end_time - first_time) / day_seconds);
             Vec2f const  slot_size = {x_end - x_start, available_size.y};
             size_t const idx       = vertex_array.appendAlignedRectangle(slot_size, Vec2f{x_start, 0.0f} + slot_size * 0.5f);
             vertex_array.setQuadColor(idx, color);
         };
 
-        auto const& entries = history->entries;
         auto const getSlotColor = [&](size_t const slot_idx) -> sf::Color {
             size_t const activity_idx = entries[slot_idx].activity_idx;
             return (*activities)[activity_idx].color;
@@ -80,7 +82,7 @@ struct DayOverviewBar final : ui::Widget
         chart.setTexture(&chart_texture.getTexture());
         chart.shadow_offset = {0.0f, 2.0f};
         chart.setPosition({ui::element_spacing, ui::element_spacing});
-        //target.draw(chart, states);
+        target.draw(chart, states);
     }
 
     bool onClick(Vec2f const) override

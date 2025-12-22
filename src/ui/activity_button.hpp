@@ -21,21 +21,12 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
     float duration = 0.0f;
     float percent = 0.0f;
 
-    sf::Color target_color = ui::background_color;
-    pez::InterpolatedData<sf::Color> color;
-
     explicit
     ActivityBackground(pez::ResourcesStore const& store, Vec2f const size_)
         : font_title{*store.getFont("font_medium")}
         , font_timer{*store.getFont("font_mono")}
         , background{ui::createBackground(size_)}
     {
-        color.setValueDirect(target_color);
-    }
-
-    void update()
-    {
-        background.setFillColor(color);
     }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override
@@ -141,8 +132,6 @@ struct ActivityButton final : ui::Widget
 
     ActivityBackground background;
 
-    pez::CardOutlined background_base;
-
     explicit
     ActivityButton(pez::ResourcesStore const& store, Vec2f const size_, size_t const activity_idx_, History const& history_)
         : ui::Widget{size_}
@@ -150,7 +139,6 @@ struct ActivityButton final : ui::Widget
         , font{*store.getFont("font_medium")}
         , history{&history_}
         , background{store, size_}
-        , background_base{ui::createBackground(size_)}
     {
         Vec2f const background_size = background.getSize();
         background.setOrigin(background_size * 0.5f);
@@ -183,13 +171,14 @@ struct ActivityButton final : ui::Widget
     {
         if (!background_height.isDone()) {
             float const height = background_height;
-            background.setOutlineThickness(outline, true);
             background.setSize({size->x, height});
         }
+        background.setOutlineThickness(outline);
+
         float const offset = highlight_offset;
         Vec2f const background_size = *size;
         background.setPosition(background_size * 0.5f + Vec2f{0.0f, offset});
-        background.setShadowOffset({0.0f, 10.0f - offset});
+        background.setShadowOffset({0.0f, 7.0f - offset});
         float const scale = highlight_scale;
         background.setScale({scale, scale});
 
@@ -197,10 +186,7 @@ struct ActivityButton final : ui::Widget
         background.percent = (background.duration / Date::now().getTimeAsSeconds()) * 100.0f;
 
         if (pez::App::getTimeWall() > 2.0f + 0.2f * activity_idx) {
-            background.color = background.target_color;
         }
-
-        background.update();
     }
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
@@ -225,7 +211,6 @@ struct ActivityButton final : ui::Widget
         target.draw(led, states);
 
         target.draw(background, states);
-        //target.draw(background_base, states);
     }
 
     bool onClick(Vec2f const) override
@@ -237,19 +222,19 @@ struct ActivityButton final : ui::Widget
     void onMouseEnter() override
     {
         if (state == State::Idle) {
-            //highlight();
+            highlight();
         }
     }
 
     void onMouseExit() override
     {
-        //resetHighlight();
+        resetHighlight();
     }
 
     void activate()
     {
         state = State::Active;
-        background_height = size->y * 0.8f;
+        //background_height = size->y * 0.8f;
         outline = 10.0f;
         resetHighlight();
 
