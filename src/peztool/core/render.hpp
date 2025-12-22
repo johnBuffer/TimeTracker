@@ -285,7 +285,7 @@ public:
     }
 
     [[nodiscard]]
-    sf::Window const& getWindow() const
+    sf::RenderWindow& getWindow() const
     {
         return m_window;
     }

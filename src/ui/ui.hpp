@@ -14,6 +14,7 @@
 #include "./day_overview_bar.hpp"
 #include "./time_bar.hpp"
 #include "./slot_info.hpp"
+#include "./window_header.hpp"
 
 using EntitiesUI = pez::RequiredEntity<>;
 using ProcessorsUI = pez::RequiredSystems<>;
@@ -37,6 +38,7 @@ struct UI final : RendererUI
     TextLabel::Ptr day_overview_label;
     TimeBar::Ptr time_bar_global;
     DayOverviewBar::Ptr day_overview_bar;
+    WindowHeader::Ptr window_header;
 
     ActivityContainer::Ptr activity_container;
     size_t current_activity{0};
@@ -93,7 +95,8 @@ struct UI final : RendererUI
 
         size_t const activity_count = configuration.activities.size();
 
-        float current_y = ui::margin;
+        window_header = root->createChild<WindowHeader>(font, m_render_size.x);
+        float current_y = ui::margin + WindowHeader::s_height;
 
         timer_label = root->createChild<TextLabel>(font);
         timer_label->setString("Distribution");

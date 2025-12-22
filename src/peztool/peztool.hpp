@@ -196,14 +196,11 @@ private:
         Vec2u window_size{1920, 1080};
         loader.tryReadSequenceIntoArray<2>("window_size", &window_size.x);
         m_render_size = window_size;
-        // Load state (fullscreen or windowed)
-        auto const fullscreen = loader.tryGetValueAs<bool>("fullscreen").value_or(false);
-        sf::State const state{fullscreen ? sf::State::Fullscreen : sf::State::Windowed};
         // Set AA level
         sf::ContextSettings settings{};
         settings.antiAliasingLevel = 8;
         // Create the window
-        m_window.create(sf::VideoMode{{window_size.x, window_size.y}}, "", sf::Style::Default, state, settings);
+        m_window.create(sf::VideoMode{{window_size.x, window_size.y}}, "", sf::Style::None, sf::State::Windowed, settings);
     }
 };
 

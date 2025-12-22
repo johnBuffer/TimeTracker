@@ -75,10 +75,14 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
     {
         pez::App::enableVSync();
         m_render_context->setClearColor({80, 80, 80});
+
+        getRenderer<UI>().window_header->title = "TimeTracker";
     }
 
     void onTick(float dt) override
     {
+        checkWindowMove();
+
         if (new_day_check_delay.getElapsedTime().asSeconds() > 2.0f) {
             new_day_check_delay.restart();
             checkNewDay();
@@ -86,7 +90,9 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
 
         if (!isMouseInWindow()) {
             auto const& renderer = getRenderer<UI>();
-            renderer.root->mouseExit();
+            if (!renderer.root->isClicked()) {
+                renderer.root->mouseExit();
+            }
         }
     }
 
@@ -105,6 +111,20 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
         if (now.day != launch_date.day) {
             pez::Singleton<History>::get().newDay(launch_date);
             launch_date = now;
+        }
+    }
+
+    void checkWindowMove()
+    {
+        auto& window = m_render_context->getWindow();
+        auto& ui = getRenderer<UI>();
+        auto& window_header = ui.window_header;
+        if (window_header->isClicked()) {
+            Vec2i const mouse_pos = sf::Mouse::getPosition();
+            Vec2i const delta = mouse_pos - window_header->click_position;
+            window_header->click_position = mouse_pos;
+            Vec2i const new_position = window.getPosition() + delta;
+            window.setPosition(new_position);
         }
     }
 };
