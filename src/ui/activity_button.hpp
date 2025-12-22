@@ -135,6 +135,8 @@ struct ActivityButton final : ui::Widget
 
     pez::CardOutlined background_base;
 
+    pez::InterpolatedFloat margin;
+
     explicit
     ActivityButton(pez::ResourcesStore const& store, Vec2f const size_, size_t const activity_idx_, History const& history_)
         : ui::Widget{size_}
@@ -144,6 +146,8 @@ struct ActivityButton final : ui::Widget
         , background{store, size_}
         , background_base{ui::createBackground(size_)}
     {
+        margin.setValueDirect(0.0f);
+
         Vec2f const background_size = background.getSize();
         background.setOrigin(background_size * 0.5f);
         background.setPosition(background_size);
@@ -187,6 +191,14 @@ struct ActivityButton final : ui::Widget
 
         background.duration = history->getDuration(activity_idx);
         background.percent = (background.duration / Date::now().getTimeAsSeconds()) * 100.0f;
+
+        if (pez::App::getTimeWall() > 1.0f) {
+            margin = 40.0f;
+        }
+
+        float const m = margin;
+        background_base.setOuterSize(*size - Vec2f{m, 3.0f * m});
+        background_base.setPosition(Vec2f{m, 2.0f * m});
     }
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
@@ -211,10 +223,7 @@ struct ActivityButton final : ui::Widget
         target.draw(led, states);
 
         target.draw(background, states);*/
-
-        if (pez::App::getTimeWall() > 4.0f + activity_idx * 0.1f) {
-            target.draw(background_base, states);
-        }
+        target.draw(background_base, states);
     }
 
     bool onClick(Vec2f const) override

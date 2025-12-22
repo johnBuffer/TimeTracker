@@ -14,6 +14,8 @@ struct TimeBar final : ui::Widget
     sf::Font const& font;
     pez::CardOutlined background;
 
+    pez::InterpolatedFloat margin;
+
     explicit
     TimeBar(sf::Font const& font_, Vec2f const size_, History const& history_, std::vector<Activity> const& activities_)
         : ui::Widget{size_}
@@ -22,13 +24,23 @@ struct TimeBar final : ui::Widget
         , font{font_}
         , background{ui::createBackground(size_)}
     {
+        margin.setValueDirect(0.0f);
+    }
+
+    void onUpdate(float const dt) override
+    {
+        if (pez::App::getTimeWall() > 1.0f) {
+            margin = 40.0f;
+        }
+
+        float const m = margin;
+        background.setOuterSize(*size - 2.0f * Vec2f{m, 0.0f});
+        background.setPosition(Vec2f{m, m});
     }
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
     {
-        if (pez::App::getTimeWall() > 3.0f) {
-            target.draw(background, states);
-        }
+        target.draw(background, states);
 
         size_t const activity_count = activities->size();
         std::vector durations(activity_count, 0.0f);
