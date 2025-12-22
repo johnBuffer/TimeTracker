@@ -21,13 +21,21 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
     float duration = 0.0f;
     float percent = 0.0f;
 
+    sf::Color target_color = ui::background_color;
+    pez::InterpolatedData<sf::Color> color;
+
     explicit
     ActivityBackground(pez::ResourcesStore const& store, Vec2f const size_)
         : font_title{*store.getFont("font_medium")}
         , font_timer{*store.getFont("font_mono")}
         , background{ui::createBackground(size_)}
     {
+        color.setValueDirect(target_color);
+    }
 
+    void update()
+    {
+        background.setFillColor(color);
     }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override
@@ -35,8 +43,8 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
         states.transform *= getTransform();
         target.draw(background, states);
 
-        drawTitle(target, states);
-        drawDuration(target, states);
+        //drawTitle(target, states);
+        //drawDuration(target, states);
     }
 
     void setShadowOffset(Vec2f const offset)
@@ -135,8 +143,6 @@ struct ActivityButton final : ui::Widget
 
     pez::CardOutlined background_base;
 
-    pez::InterpolatedFloat margin;
-
     explicit
     ActivityButton(pez::ResourcesStore const& store, Vec2f const size_, size_t const activity_idx_, History const& history_)
         : ui::Widget{size_}
@@ -146,8 +152,6 @@ struct ActivityButton final : ui::Widget
         , background{store, size_}
         , background_base{ui::createBackground(size_)}
     {
-        margin.setValueDirect(0.0f);
-
         Vec2f const background_size = background.getSize();
         background.setOrigin(background_size * 0.5f);
         background.setPosition(background_size);
@@ -192,18 +196,16 @@ struct ActivityButton final : ui::Widget
         background.duration = history->getDuration(activity_idx);
         background.percent = (background.duration / Date::now().getTimeAsSeconds()) * 100.0f;
 
-        if (pez::App::getTimeWall() > 1.0f) {
-            margin = 40.0f;
+        if (pez::App::getTimeWall() > 2.0f + 0.2f * activity_idx) {
+            background.color = background.target_color;
         }
 
-        float const m = margin;
-        background_base.setOuterSize(*size - Vec2f{m * 1.2f, 3.0f * m});
-        background_base.setPosition(Vec2f{m - (m * 0.2f * activity_idx), 2.0f * m});
+        background.update();
     }
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
     {
-        /*float constexpr led_radius = 10.0f;
+        float constexpr led_radius = 10.0f;
         float constexpr led_offset = 40.0f;
 
         sf::Text text{font, "Active", 192};
@@ -222,8 +224,8 @@ struct ActivityButton final : ui::Widget
         led.setPosition(text.getPosition() - Vec2f{bounds.size.x * ActivityBackground::text_scale_f * 0.5f + led_offset, 8.0f});
         target.draw(led, states);
 
-        target.draw(background, states);*/
-        target.draw(background_base, states);
+        target.draw(background, states);
+        //target.draw(background_base, states);
     }
 
     bool onClick(Vec2f const) override

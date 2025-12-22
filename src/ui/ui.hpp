@@ -142,7 +142,7 @@ struct UI final : RendererUI
             activity_button->on_activate = [this, i] {
                 activate(i);
             };
-            activity_button->background.setFillColor(configuration.activities[i].color);
+            activity_button->background.target_color = configuration.activities[i].color;
             activity_button->background.activity_label = configuration.activities[i].name;
         }
 

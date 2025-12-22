@@ -19,7 +19,7 @@ sf::Color constexpr subtitle_color = {50, 50, 50, 150};
 size_t constexpr value_size{42};
 sf::Color constexpr value_color = {250, 250, 250, 200};
 
-float constexpr margin = 0.0f;
+float constexpr margin = 40.0f;
 float constexpr element_spacing = 10.0f;
 
 }

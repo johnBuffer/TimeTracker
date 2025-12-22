@@ -11,7 +11,7 @@ inline pez::CardOutlined createBackground(Vec2f const size)
 {
     pez::CardOutlined card{size, background_radius, outline_thickness, background_color};
     card.setOutlineShadowSize(0.0f);
-    card.setBackgroundShadowSize(0.0f * background_shadow);
+    card.setBackgroundShadowSize(background_shadow);
     card.background.blur_background = false;
     card.background.shadow_offset = {0.0f, 7.0f};
     card.setOutlineColor(outline_color);

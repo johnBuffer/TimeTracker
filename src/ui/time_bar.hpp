@@ -30,12 +30,8 @@ struct TimeBar final : ui::Widget
     void onUpdate(float const dt) override
     {
         if (pez::App::getTimeWall() > 1.0f) {
-            margin = 40.0f;
+            margin = 7.0f;
         }
-
-        float const m = margin;
-        background.setOuterSize(*size - 2.0f * Vec2f{m, 0.0f});
-        background.setPosition(Vec2f{m, m});
     }
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
