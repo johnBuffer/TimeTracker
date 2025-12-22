@@ -80,7 +80,7 @@ struct DayOverviewBar final : ui::Widget
         chart.setTexture(&chart_texture.getTexture());
         chart.shadow_offset = {0.0f, 2.0f};
         chart.setPosition({ui::element_spacing, ui::element_spacing});
-        target.draw(chart, states);
+        //target.draw(chart, states);
     }
 
     bool onClick(Vec2f const) override

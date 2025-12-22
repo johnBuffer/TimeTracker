@@ -133,6 +133,8 @@ struct ActivityButton final : ui::Widget
 
     ActivityBackground background;
 
+    pez::CardOutlined background_base;
+
     explicit
     ActivityButton(pez::ResourcesStore const& store, Vec2f const size_, size_t const activity_idx_, History const& history_)
         : ui::Widget{size_}
@@ -140,6 +142,7 @@ struct ActivityButton final : ui::Widget
         , font{*store.getFont("font_medium")}
         , history{&history_}
         , background{store, size_}
+        , background_base{ui::createBackground(size_)}
     {
         Vec2f const background_size = background.getSize();
         background.setOrigin(background_size * 0.5f);
@@ -188,7 +191,7 @@ struct ActivityButton final : ui::Widget
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
     {
-        float constexpr led_radius = 10.0f;
+        /*float constexpr led_radius = 10.0f;
         float constexpr led_offset = 40.0f;
 
         sf::Text text{font, "Active", 192};
@@ -207,7 +210,9 @@ struct ActivityButton final : ui::Widget
         led.setPosition(text.getPosition() - Vec2f{bounds.size.x * ActivityBackground::text_scale_f * 0.5f + led_offset, 8.0f});
         target.draw(led, states);
 
-        target.draw(background, states);
+        target.draw(background, states);*/
+
+        target.draw(background_base, states);
     }
 
     bool onClick(Vec2f const) override
@@ -219,13 +224,13 @@ struct ActivityButton final : ui::Widget
     void onMouseEnter() override
     {
         if (state == State::Idle) {
-            highlight();
+            //highlight();
         }
     }
 
     void onMouseExit() override
     {
-        resetHighlight();
+        //resetHighlight();
     }
 
     void activate()
