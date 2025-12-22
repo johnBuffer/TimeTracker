@@ -2,6 +2,8 @@
 
 #include "peztool/core/system.hpp"
 #include "peztool/utils/render/blur/blur.hpp"
+#include "peztool/utils/render/utils.hpp"
+
 #include "standard/drawer.hpp"
 #include "standard/text_label.hpp"
 
@@ -11,6 +13,7 @@
 #include "./activity_container.hpp"
 #include "./day_overview_bar.hpp"
 #include "./time_bar.hpp"
+#include "./slot_info.hpp"
 
 using EntitiesUI = pez::RequiredEntity<>;
 using ProcessorsUI = pez::RequiredSystems<>;
@@ -37,6 +40,7 @@ struct UI final : RendererUI
 
     ActivityContainer::Ptr activity_container;
     size_t current_activity{0};
+    SlotInfo slot_info;
 
     Blur background_blur;
 
@@ -44,12 +48,13 @@ struct UI final : RendererUI
         : RendererUI{render_size_, store_}
         , font{getFontMedium()}
         , background_blur{Vec2u{render_size_}}
+        , slot_info{font}
     {
         // Create the root widget, parent of all widgets
         root = std::make_shared<ui::Widget>(m_render_size);
-
+        // Initialize blur shaders
         CardShader::get().setRenderSize(m_render_size);
-        background_blur.kernel.setRadius(2.5f);
+        background_blur.kernel.setRadius(4.5f);
     }
 
     void onInitialized() override
@@ -57,26 +62,33 @@ struct UI final : RendererUI
         initializeUI();
     }
 
-    void updateTime()
-    {
-    }
-
     void render(pez::RenderContext& context) override
     {
-        updateTime();
-        //auto const& blur_texture = background_blur.apply(context);
-
-        sf::RenderStates states;
-        //states.texture = &blur_texture;
-
         root->update(pez::App::getDt());
-        context.draw(*root, states);
+        context.draw(*root);
+
+        auto const& blur_texture = background_blur.apply(context);
+        sf::RenderStates states;
+        states.texture = &blur_texture;
+
+        if (day_overview_bar->slot_hover) {
+            auto const& hover = *day_overview_bar->slot_hover;
+            float const day_height = day_overview_bar->size->y;
+            Vec2f const slot_position = day_overview_bar->getPosition() + Vec2f{hover.slot_position_x, day_height - ui::element_spacing};
+            Vec2f const info_position = slot_position + Vec2f{0.0f, 2.0f * ui::element_spacing};
+
+            slot_info.setHover(hover, info_position);
+        } else {
+            slot_info.setVisible(false);
+        }
+        slot_info.update();
+        context.draw(slot_info, states);
     }
 
     void initializeUI()
     {
-        int32_t const label_size = 32;
-        float const label_x = ui::margin + 0.5f * ui::background_radius;
+        int32_t constexpr   label_size  = 32;
+        float constexpr     label_x     = ui::margin + 0.5f * ui::background_radius;
         sf::Color constexpr label_color = pez::setAlpha(sf::Color::White, 200);
 
         size_t const activity_count = configuration.activities.size();
@@ -105,22 +117,6 @@ struct UI final : RendererUI
         day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
         day_overview_bar->setPosition({ui::margin, current_y});
         current_y += 1.5f * ui::margin + time_bar_height;
-
-        /*std::array palette{
-            sf::Color{120, 120, 120},
-            sf::Color{239, 71, 111},
-            sf::Color{255, 209, 102},
-            sf::Color{6, 214, 160},
-            sf::Color{17, 138, 178}
-        };
-
-        std::array labels{
-            "Nothing",
-            "Activity 1",
-            "Activity 2",
-            "Activity 3",
-            "Activity 4",
-        };*/
 
         Vec2f const activity_container_size = {
             m_render_size.x - 2.0f * ui::margin,

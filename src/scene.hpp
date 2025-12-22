@@ -12,6 +12,9 @@ using Renderers = pez::SystemPack<UI>;
 
 struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
 {
+    sf::Clock new_day_check_delay;
+    Date launch_date = Date::now();
+
     TimeTracker()
     {
         // Fonts
@@ -40,10 +43,6 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
 
         handler.onKeyPressed(sf::Keyboard::Key::Escape, [&](sf::Event::KeyPressed) {
             pez::App::exit();
-        });
-
-        handler.onKeyPressed(sf::Keyboard::Key::Enter, [&](sf::Event::KeyPressed) {
-            getRenderer<UI>().history.saveToFile();
         });
 
         handler.onMouseMoved([&](sf::Event::MouseMoved const&)
@@ -80,6 +79,11 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
 
     void onTick(float dt) override
     {
+        if (new_day_check_delay.getElapsedTime().asSeconds() > 2.0f) {
+            new_day_check_delay.restart();
+            checkNewDay();
+        }
+
         if (!isMouseInWindow()) {
             auto const& renderer = getRenderer<UI>();
             renderer.root->mouseExit();
@@ -93,5 +97,14 @@ struct TimeTracker final : pez::Scene<Entities, Processors, Renderers>
         Vec2f const window_size = m_render_context->getRenderSize();
         sf::FloatRect const bounding_box{{}, window_size};
         return bounding_box.contains(mouse_position);
+    }
+
+    void checkNewDay()
+    {
+        Date const now = Date::now();
+        if (now.day != launch_date.day) {
+            pez::Singleton<History>::get().newDay(launch_date);
+            launch_date = now;
+        }
     }
 };

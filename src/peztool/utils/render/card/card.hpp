@@ -29,9 +29,7 @@ struct Card : public sf::Drawable, public sf::Transformable
     Card()
         : va{sf::PrimitiveType::TriangleFan}
         , va_shadow{1}
-    {
-
-    }
+    {}
 
     Card(Vec2f const size_, float const corner_radius_, sf::Color const color_)
         : va{sf::PrimitiveType::TriangleFan}

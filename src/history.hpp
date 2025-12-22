@@ -68,7 +68,8 @@ struct Date
         auto const minute = time.minutes().count();
         auto const second = static_cast<int32_t>(time.seconds().count());
         auto const millisecond = static_cast<int32_t>(duration_cast<std::chrono::milliseconds>(time.subseconds()).count());
-        return {year, month, day, hour, minute, second, millisecond};
+        //return {year, month, day, hour, minute, second, millisecond};
+        return {year, month, 21, 23, 0, 0, 0};
     }
 };
 
@@ -107,15 +108,13 @@ struct History
         entries = load(getCurrentSaveFile());
         // No entry, create the midnight default entry
         if (entries.empty()) {
-            Date midnight = Date::now();
-            midnight.setTime(0, 0, 0);
-            addEntry(midnight, 0);
+            addEntry(getMidnight(), 0);
         }
     }
 
     ~History()
     {
-        saveToFile();
+        saveToFile(getCurrentSaveFile());
     }
 
     /// Adds a new activity entry in the history
@@ -156,22 +155,32 @@ struct History
         return (getDuration(activity_idx) / current_seconds) * 100.0f;
     }
 
+    /// Returns the index of the last activity
     [[nodiscard]]
     size_t getLastActivityIdx() const
     {
         return entries.back().activity_idx;
     }
 
-    /// Saves the current history to a file
-    void saveToFile() const
+    /// Starts a new day that continues the last one
+    void newDay(Date const& last_day)
     {
-        std::string const current_file = getCurrentSaveFile();
+        // Save the last day
+        saveToFile(getSaveFile(last_day));
+        // Use last day's ongoing activity as today's first one
+        size_t const first_activity_idx{getLastActivityIdx()};
+        entries.clear();
+        addEntry(getMidnight(), first_activity_idx);
+    }
 
+    /// Saves the current history to a file
+    void saveToFile(std::string const& filename) const
+    {
         size_t const entry_count = entries.size();
         size_t save_from_idx = 0;
-        if (std::filesystem::exists(current_file)) {
+        if (std::filesystem::exists(filename)) {
             std::cout << "Save found for today, appending" << std::endl;
-            auto const last_data = load(current_file).back();
+            auto const last_data = load(filename).back();
             for (; save_from_idx < entry_count; ++save_from_idx) {
                 if (entries[save_from_idx].date.getTimeAsSeconds() > last_data.date.getTimeAsSeconds()) {
                     break;
@@ -182,7 +191,7 @@ struct History
         }
 
         std::cout << "Saving from idx " << save_from_idx << std::endl;
-        std::ofstream file(current_file, std::ios::app);
+        std::ofstream file(filename, std::ios::app);
         for (size_t i{save_from_idx}; i < entry_count; ++i) {
             file << entries[i].toString() << '\n';
         }
@@ -240,7 +249,22 @@ struct History
     [[nodiscard]]
     static std::string getCurrentSaveFile()
     {
-        auto const now = Date::now();
-        return std::format("{}{:0>2}{:0>2}.txt", now.year, now.month, now.day);
+        return getSaveFile(Date::now());
+    }
+
+    /// Returns the save filename for today
+    [[nodiscard]]
+    static std::string getSaveFile(Date const& date)
+    {
+        return std::format("data/history/{}{:0>2}{:0>2}.txt", date.year, date.month, date.day);
+    }
+
+private:
+    [[nodiscard]]
+    static Date getMidnight()
+    {
+        Date midnight = Date::now();
+        midnight.setTime(0, 0, 0);
+        return midnight;
     }
 };

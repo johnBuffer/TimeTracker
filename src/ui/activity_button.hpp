@@ -1,11 +1,10 @@
 #pragma once
+#include "./history.hpp"
+#include "./ui_common.hpp"
 #include "peztool/utils/color_utils.hpp"
 #include "peztool/utils/interpolation/standard_interpolated_value.hpp"
 #include "standard/widget.hpp"
-
-#include "./ui_common.hpp"
-#include "./history.hpp"
-
+#include "utils.hpp"
 
 
 struct ActivityBackground : public sf::Transformable, public sf::Drawable
@@ -96,17 +95,7 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
         text.setFillColor(pez::setAlpha(sf::Color::White, 150));
         auto const bounds = text.getLocalBounds();
         text.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, 0.0f});
-
-        auto const    seconds = static_cast<int32_t>(duration);
-        int32_t const minutes = seconds / 60;
-        int32_t const hours   = minutes / 60;
-        std::string const duration_str = std::format(
-            "{:0>2}:{:0>2}:{:0>2}",
-            hours,
-            minutes % 60,
-            seconds % 60);
-
-        text.setString(duration_str);
+        text.setString(timeToString(duration));
 
         Vec2f const size = getSize();
         text.setPosition(size * 0.5f);

@@ -24,3 +24,14 @@ inline void checkDataDirectory()
     }
     // The correct directories should be created at this point
 }
+
+inline std::string timeToString(float const seconds)
+{
+    int32_t const minutes = static_cast<int32_t>(seconds) / 60;
+    int32_t const hours   = minutes / 60;
+    return std::format(
+        "{:0>2}:{:0>2}:{:0>2}",
+        hours,
+        minutes % 60,
+        static_cast<int32_t>(seconds) % 60);
+}
