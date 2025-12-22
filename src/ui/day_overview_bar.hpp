@@ -1,8 +1,9 @@
 #pragma once
+#include "standard/widget.hpp"
+#include "shader/hatch.hpp"
+
 #include "./ui_common.hpp"
 #include "./history.hpp"
-#include "standard/widget.hpp"
-
 
 struct DayOverviewBar final : ui::Widget
 {
@@ -27,6 +28,8 @@ struct DayOverviewBar final : ui::Widget
     // Hover
     std::optional<SlotHover> slot_hover;
 
+    HatchShader shader;
+
     explicit DayOverviewBar(Vec2f const size_, History const& history_, std::vector<Activity> const& activities_)
         : ui::Widget{size_}
         , history{&history_}
@@ -37,6 +40,8 @@ struct DayOverviewBar final : ui::Widget
         if (!chart_texture.resize(texture_size)) {
             std::cout << "Unable to create chart texture" << std::endl;
         }
+
+        shader.setRenderSize(size_);
     }
 
     void onUpdate(float const dt) override
@@ -51,6 +56,9 @@ struct DayOverviewBar final : ui::Widget
         float const first_time = entries.front().date.getTimeAsSeconds();
 
         chart_texture.clear({50, 50, 50});
+        sf::RectangleShape const hatch_rect{*size};
+        chart_texture.draw(hatch_rect, shader.get());
+
         auto const createSlot = [&](float const start_time, float const end_time, sf::Color const color) {
             float const  x_start   = available_size.x * ((start_time - first_time) / day_seconds);
             float const  x_end     = available_size.x * ((end_time - first_time) / day_seconds);
