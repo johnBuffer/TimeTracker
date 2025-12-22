@@ -67,9 +67,12 @@ struct UI final : RendererUI
         root->update(pez::App::getDt());
         context.draw(*root);
 
-        auto const& blur_texture = background_blur.apply(context);
         sf::RenderStates states;
-        states.texture = &blur_texture;
+
+        if (slot_info.scale > 0.0f) {
+            auto const& blur_texture = background_blur.apply(context);
+            states.texture = &blur_texture;
+        }
 
         if (day_overview_bar->slot_hover) {
             auto const& hover = *day_overview_bar->slot_hover;
