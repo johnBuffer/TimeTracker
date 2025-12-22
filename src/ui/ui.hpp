@@ -74,7 +74,6 @@ struct UI final : RendererUI
         }
 
         if (day_overview_bar->slot_hover) {
-            std::cout << "LOL" << std::endl;
             auto const& hover = *day_overview_bar->slot_hover;
             float const day_height = day_overview_bar->size->y;
             Vec2f const slot_position = day_overview_bar->getPosition() + Vec2f{hover.slot_position_x, day_height - ui::element_spacing};
