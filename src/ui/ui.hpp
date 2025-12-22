@@ -95,8 +95,20 @@ struct UI final : RendererUI
         sf::Color constexpr label_color = pez::setAlpha(sf::Color::White, 200);
 
         size_t const activity_count = configuration.activities.size();
+        Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
 
         float current_y = ui::margin;
+
+        day_overview_label = root->createChild<TextLabel>(font);
+        day_overview_label->setString("Timeline");
+        day_overview_label->setPosition({label_x, current_y});
+        day_overview_label->setCharacterSize(label_size);
+        day_overview_label->setFillColor(label_color);
+        current_y += 0.35f * ui::margin + day_overview_label->size->y;
+
+        day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
+        day_overview_bar->setPosition({ui::margin, current_y});
+        current_y += 0.75f * ui::margin + time_bar_height;
 
         timer_label = root->createChild<TextLabel>(font);
         timer_label->setString("Distribution");
@@ -105,20 +117,8 @@ struct UI final : RendererUI
         timer_label->setFillColor(label_color);
         current_y += 0.35f * ui::margin + timer_label->size->y;
 
-        Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
         time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, configuration.activities);
         time_bar_global->setPosition({ui::margin, current_y});
-        current_y += 0.75f * ui::margin + time_bar_height;
-
-        day_overview_label = root->createChild<TextLabel>(font);
-        day_overview_label->setString("Overview");
-        day_overview_label->setPosition({label_x, current_y});
-        day_overview_label->setCharacterSize(label_size);
-        day_overview_label->setFillColor(label_color);
-        current_y += 0.35f * ui::margin + day_overview_label->size->y;
-
-        day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
-        day_overview_bar->setPosition({ui::margin, current_y});
         current_y += 1.5f * ui::margin + time_bar_height;
 
         Vec2f const activity_container_size = {

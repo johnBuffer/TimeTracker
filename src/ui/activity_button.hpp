@@ -191,7 +191,7 @@ struct ActivityButton final : ui::Widget
         float constexpr led_radius = 10.0f;
         float constexpr led_offset = 40.0f;
 
-        sf::Text text{font, "Active", 192};
+        sf::Text text{font, "Active", 150};
         text.setScale(ActivityBackground::text_scale);
         auto const bounds = text.getLocalBounds();
         text.setOrigin(bounds.position + bounds.size * 0.5f);
