@@ -47,8 +47,8 @@ struct UI final : RendererUI
     UI(Vec2f const render_size_, pez::ResourcesStore const& store_)
         : RendererUI{render_size_, store_}
         , font{getFontMedium()}
+        , slot_info{font, configuration.activities}
         , background_blur{Vec2u{render_size_}}
-        , slot_info{font}
     {
         // Create the root widget, parent of all widgets
         root = std::make_shared<ui::Widget>(m_render_size);

@@ -125,16 +125,14 @@ private:
             Vec2f const start_end = {entries[i].date.getTimeAsSeconds(), entries[i + 1].date.getTimeAsSeconds()};
             Vec2f const range     = getSlotRangeX(start_end.x, start_end.y);
             if (x > range.x && x < range.y) {
-                float const slot_center_x = (range.x + range.y) * 0.5f;
-                return SlotHover{i, slot_center_x, start_end.x, start_end.y};
+                return SlotHover{entries[i].activity_idx, x, start_end.x, start_end.y};
             }
         }
         // Check the last (ongoing) one
         Vec2f const start_end = {entries.back().date.getTimeAsSeconds(), Date::now().getTimeAsSeconds()};
         Vec2f const last_range = getSlotRangeX(start_end.x, start_end.y);
         if (x > last_range.x && x < last_range.y) {
-            float const slot_center_x = (last_range.x + last_range.y) * 0.5f;
-            return SlotHover{entry_count - 1, slot_center_x, start_end.x, start_end.y};
+            return SlotHover{entries[entry_count - 1].activity_idx, x, start_end.x, start_end.y};
         }
 
         return std::nullopt;

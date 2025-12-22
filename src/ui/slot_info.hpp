@@ -8,7 +8,9 @@
 
 struct SlotInfo final : sf::Transformable, sf::Drawable
 {
-    static Vec2f constexpr s_size{300.0f, 280.0f};
+    static Vec2f constexpr s_size{300.0f, 200.0f};
+
+    std::vector<Activity> const* activities;
 
     sf::Font const& font;
     pez::Card background;
@@ -20,8 +22,9 @@ struct SlotInfo final : sf::Transformable, sf::Drawable
     DayOverviewBar::SlotHover current_hover;
 
     explicit
-    SlotInfo(sf::Font const& font_)
-        : font{font_}
+    SlotInfo(sf::Font const& font_, std::vector<Activity> const& activities_)
+        : activities{&activities_}
+        , font{font_}
         , background{s_size, ui::background_radius, {200, 200, 200}}
     {
         setOrigin({s_size.x * 0.5f, 0.0f});
@@ -29,7 +32,7 @@ struct SlotInfo final : sf::Transformable, sf::Drawable
         background.shadow_offset = {0.0f, 10.0f};
         background.blur_background = true;
 
-        position.setInterpolationSpeed(4.0f);
+        position.setInterpolationSpeed(8.0f);
         scale.setInterpolationSpeed(4.0f);
     }
 
@@ -47,27 +50,40 @@ struct SlotInfo final : sf::Transformable, sf::Drawable
 
         float const margin{2.0f * ui::element_spacing};
 
-        sf::Text text{font, "Activity", 32};
+        sf::Text text{font, (*activities)[current_hover.activity_idx].name, 32};
         ui::setOrigin(text, ui::origin::Mode::TopCenter);
         text.setPosition({s_size.x * 0.5f, margin});
         target.draw(text, states);
 
-        text.setCharacterSize(24);
+        text.setCharacterSize(48);
         text.setString("00:00:00");
+        auto const bounds = text.getLocalBounds();
 
-        text.setPosition({margin, 100.0f});
-        ui::setOrigin(text, ui::origin::Mode::LeftCenter);
+        text.setFillColor(sf::Color::White);
+        text.setString(timeToString(current_hover.end_time - current_hover.start_time));
+        text.setOrigin(bounds.position + bounds.size * 0.5f);
+        text.setPosition(s_size * 0.5f);
         target.draw(text, states);
 
-        text.setPosition({s_size.x - margin, 100.0f});
-        ui::setOrigin(text, ui::origin::Mode::RightCenter);
+        float const slot_time_scale = 0.5f;
+        text.setScale({slot_time_scale, slot_time_scale});
+        text.setFillColor(pez::setAlpha(sf::Color::White, 150));
+        float const slot_times_y = s_size.y - bounds.size.y * slot_time_scale - margin;
+        text.setString(timeToString(current_hover.start_time));
+        text.setPosition({margin, slot_times_y});
+        text.setOrigin(bounds.position + Vec2f{0.0f, bounds.size.y * 0.5f});
+        target.draw(text, states);
+
+        text.setString(timeToString(current_hover.end_time));
+        text.setPosition({s_size.x - margin, slot_times_y});
+        text.setOrigin(bounds.position + Vec2f{bounds.size.x, bounds.size.y * 0.5f});
         target.draw(text, states);
     }
 
     void setHover(DayOverviewBar::SlotHover const& hover, Vec2f const position_)
     {
         if (hover.slot_position_x != current_hover.slot_position_x) {
-            position = position_;
+            position.setValueDirect(position_);
             current_hover = hover;
             setVisible(true);
         }
