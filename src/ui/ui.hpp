@@ -79,7 +79,6 @@ struct UI final : RendererUI
             float const day_height = day_overview_bar->size->y;
             Vec2f const slot_position = day_overview_bar->getPosition() + Vec2f{hover.slot_position_x, day_height - ui::element_spacing};
             Vec2f const info_position = slot_position + Vec2f{0.0f, 2.0f * ui::element_spacing};
-
             slot_info.setHover(hover, info_position);
         } else {
             slot_info.setVisible(false);
