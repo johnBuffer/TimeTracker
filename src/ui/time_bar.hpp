@@ -26,7 +26,9 @@ struct TimeBar final : ui::Widget
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
     {
-        target.draw(background, states);
+        if (pez::App::getTimeWall() > 3.0f) {
+            target.draw(background, states);
+        }
 
         size_t const activity_count = activities->size();
         std::vector durations(activity_count, 0.0f);

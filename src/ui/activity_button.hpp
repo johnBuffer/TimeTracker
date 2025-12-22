@@ -212,7 +212,9 @@ struct ActivityButton final : ui::Widget
 
         target.draw(background, states);*/
 
-        target.draw(background_base, states);
+        if (pez::App::getTimeWall() > 4.0f + activity_idx * 0.1f) {
+            target.draw(background_base, states);
+        }
     }
 
     bool onClick(Vec2f const) override

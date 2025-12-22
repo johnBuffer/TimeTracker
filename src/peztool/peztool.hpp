@@ -193,7 +193,7 @@ private:
         // Load user configuration
         cload::ConfigurationLoader const loader{conf_filename};
         // Load window size
-        Vec2u window_size{1920, 1080};
+        Vec2u window_size{2560, 1440};
         loader.tryReadSequenceIntoArray<2>("window_size", &window_size.x);
         m_render_size = window_size;
         // Load state (fullscreen or windowed)
