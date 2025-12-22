@@ -21,7 +21,7 @@ struct ActivityContainer final : ui::Widget
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
     {
-        //target.draw(background, states);
+        target.draw(background, states);
     }
 
     bool onClick(Vec2f const) override

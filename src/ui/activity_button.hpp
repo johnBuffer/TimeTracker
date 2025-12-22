@@ -34,8 +34,8 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
         states.transform *= getTransform();
         target.draw(background, states);
 
-        //drawTitle(target, states);
-        //drawDuration(target, states);
+        drawTitle(target, states);
+        drawDuration(target, states);
     }
 
     void setShadowOffset(Vec2f const offset)
@@ -183,7 +183,7 @@ struct ActivityButton final : ui::Widget
         background.setScale({scale, scale});
 
         background.duration = history->getDuration(activity_idx);
-        background.percent = (background.duration / Date::now().getTimeAsSeconds()) * 100.0f;
+        background.percent = (background.duration / (Date::now().getTimeAsSeconds() - history->entries.front().date.getTimeAsSeconds())) * 100.0f;
 
         if (pez::App::getTimeWall() > 2.0f + 0.2f * activity_idx) {
         }
@@ -194,7 +194,7 @@ struct ActivityButton final : ui::Widget
         float constexpr led_radius = 10.0f;
         float constexpr led_offset = 40.0f;
 
-        sf::Text text{font, "Active", 192};
+        sf::Text text{font, "Active", 150};
         text.setScale(ActivityBackground::text_scale);
         auto const bounds = text.getLocalBounds();
         text.setOrigin(bounds.position + bounds.size * 0.5f);
@@ -234,7 +234,7 @@ struct ActivityButton final : ui::Widget
     void activate()
     {
         state = State::Active;
-        //background_height = size->y * 0.8f;
+        background_height = size->y * 0.8f;
         outline = 10.0f;
         resetHighlight();
 

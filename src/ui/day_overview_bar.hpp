@@ -113,15 +113,16 @@ private:
     {
         size_t const entry_count = history->entries.size();
         Vec2f const available_size = getAvailableSize();
-        float constexpr day_seconds = 3600.0f * 24.0f;
+        float constexpr day_seconds = 30.0f;
 
+        auto const& entries = history->entries;
+        float const first_time = entries.front().date.getTimeAsSeconds();
         auto const getSlotRangeX = [&](float const start_time, float const end_time) {
-            float const  x_start   = ui::element_spacing + available_size.x * (start_time / day_seconds);
-            float const  x_end     = ui::element_spacing + available_size.x * (end_time / day_seconds);
+            float const  x_start   = ui::element_spacing + available_size.x * ((start_time - first_time) / day_seconds);
+            float const  x_end     = ui::element_spacing + available_size.x * ((end_time - first_time) / day_seconds);
             return Vec2f{x_start, x_end};
         };
 
-        auto const& entries = history->entries;
         // Check all entries except the last
         for (size_t i = 0; i < entry_count - 1; ++i) {
             Vec2f const start_end = {entries[i].date.getTimeAsSeconds(), entries[i + 1].date.getTimeAsSeconds()};

@@ -61,7 +61,7 @@ struct TimeBar final : ui::Widget
             pez::Card time_slot{{width, height}, ui::background_radius - ui::element_spacing, activity.color};
             time_slot.setPosition({current_x, ui::element_spacing});
             time_slot.shadow_offset = {0.0f, 2.0f};
-            //target.draw(time_slot, states);
+            target.draw(time_slot, states);
             current_x += width + ui::element_spacing;
         }
     }
