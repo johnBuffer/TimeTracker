@@ -197,8 +197,8 @@ struct ActivityButton final : ui::Widget
         }
 
         float const m = margin;
-        background_base.setOuterSize(*size - Vec2f{m, 3.0f * m});
-        background_base.setPosition(Vec2f{m, 2.0f * m});
+        background_base.setOuterSize(*size - Vec2f{m * 1.2f, 3.0f * m});
+        background_base.setPosition(Vec2f{m - (m * 0.2f * activity_idx), 2.0f * m});
     }
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
