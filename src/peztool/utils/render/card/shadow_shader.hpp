@@ -3,6 +3,8 @@
 #include <string_view>
 #include <SFML/Graphics/Shader.hpp>
 
+#include "peztool/utils/color_utils.hpp"
+
 
 struct ShadowShader
 {

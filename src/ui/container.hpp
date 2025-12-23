@@ -5,18 +5,19 @@
 #include "./activity_button.hpp"
 
 
-struct ActivityContainer final : ui::Widget
+struct Container final : ui::Widget
 {
-    using Ptr = std::shared_ptr<ActivityContainer>;
+    using Ptr = std::shared_ptr<Container>;
 
     pez::CardOutlined background;
 
     explicit
-    ActivityContainer(Vec2f const size_)
+    Container(Vec2f const size_)
         : ui::Widget{size_}
         , background{ui::createBackground(size_)}
     {
         background.background.setCornerRadius(ui::background_radius + ui::margin);
+        background.setFillColor({150, 150, 150});
     }
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
@@ -27,11 +28,5 @@ struct ActivityContainer final : ui::Widget
     bool onClick(Vec2f const) override
     {
         return true;
-    }
-
-    [[nodiscard]]
-    ActivityButton::Ptr getButton(size_t const idx)
-    {
-        return getTypedChild<ActivityButton>(idx);
     }
 };

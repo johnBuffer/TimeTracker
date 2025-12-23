@@ -2,6 +2,7 @@
 #include "standard/widget.hpp"
 
 #include "./ui_common.hpp"
+#include "activity.hpp"
 
 
 struct TimeBar final : ui::Widget

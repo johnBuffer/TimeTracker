@@ -1,20 +1,17 @@
 #pragma once
 
+#include "./activity_button.hpp"
+#include "./activity_info.hpp"
+#include "./container.hpp"
+#include "./day_overview_bar.hpp"
+#include "./slot_info.hpp"
+#include "./time_bar.hpp"
+#include "configuration.hpp"
 #include "peztool/core/system.hpp"
 #include "peztool/utils/render/blur/blur.hpp"
 #include "peztool/utils/render/utils.hpp"
-
 #include "standard/drawer.hpp"
 #include "standard/text_label.hpp"
-
-#include "configuration.hpp"
-
-#include "./activity_button.hpp"
-#include "./activity_container.hpp"
-#include "./day_overview_bar.hpp"
-#include "./time_bar.hpp"
-#include "./slot_info.hpp"
-#include "./activity_info.hpp"
 
 
 using EntitiesUI = pez::RequiredEntity<>;
@@ -40,7 +37,7 @@ struct UI final : RendererUI
     TimeBar::Ptr time_bar_global;
     DayOverviewBar::Ptr day_overview_bar;
 
-    ActivityContainer::Ptr activity_container;
+    std::vector<ActivityButton::Ptr> buttons;
     size_t current_activity{0};
 
     SlotInfo slot_info;
@@ -106,42 +103,24 @@ struct UI final : RendererUI
 
     void initializeUI()
     {
-        int32_t constexpr   label_size  = 32;
-        float constexpr     label_x     = ui::margin + 0.5f * ui::background_radius;
-        sf::Color constexpr label_color = pez::setAlpha(sf::Color::White, 200);
-
         size_t const activity_count = configuration.activities.size();
         Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
 
         float current_y = ui::margin;
 
-        day_overview_label = root->createChild<TextLabel>(font);
-        day_overview_label->setString("Timeline");
-        day_overview_label->setPosition({label_x, current_y});
-        day_overview_label->setCharacterSize(label_size);
-        day_overview_label->setFillColor(label_color);
-        current_y += 0.35f * ui::margin + day_overview_label->size->y;
-
         day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
         day_overview_bar->setPosition({ui::margin, current_y});
-        current_y += 0.75f * ui::margin + time_bar_height;
-
-        timer_label = root->createChild<TextLabel>(font);
-        timer_label->setString("Distribution");
-        timer_label->setPosition({label_x, current_y});
-        timer_label->setCharacterSize(label_size);
-        timer_label->setFillColor(label_color);
-        current_y += 0.35f * ui::margin + timer_label->size->y;
+        current_y += 1.0f * ui::margin + time_bar_height;
 
         time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, configuration.activities);
         time_bar_global->setPosition({ui::margin, current_y});
-        current_y += 1.5f * ui::margin + time_bar_height;
+        current_y += 1.0f * ui::margin + time_bar_height;
 
         Vec2f const activity_container_size = {
             m_render_size.x - 2.0f * ui::margin,
             m_render_size.y - ui::margin - current_y
         };
-        activity_container = root->createChild<ActivityContainer>(activity_container_size);
+        auto const activity_container = root->createChild<Container>(activity_container_size);
         activity_container->setPosition({ui::margin, current_y});
 
         auto const activity_count_f = static_cast<float>(activity_count);
@@ -149,22 +128,20 @@ struct UI final : RendererUI
         float const activity_width = (activity_container_size.x - ui::margin * (activity_count_f + 1.0f)) / activity_count_f;
         Vec2f const activity_size = {activity_width, activity_height};
         for (size_t i = 0; i < activity_count; ++i) {
-            Activity const& activity = configuration.activities[i];
             auto const activity_button = activity_container->createChild<ActivityButton>(m_resources, activity_size, i, history);
-            float const y = ui::margin;
             float const x = ui::margin + static_cast<float>(i) * (activity_width + ui::margin);
-            activity_button->setPosition({x, y});
+            activity_button->setPosition({x, ui::margin});
             activity_button->on_activate = [this, i] {
                 activate(i);
             };
             activity_button->background.setFillColor(configuration.activities[i].color);
             activity_button->background.activity_label = configuration.activities[i].name;
+            buttons.push_back(activity_button);
         }
 
         size_t const last_activity = history.getLastActivityIdx();
-        auto const& button = activity_container->getButton(last_activity);
-        if (button) {
-            button->activate();
+        if (last_activity < buttons.size()) {
+            buttons[last_activity]->activate();
         } else {
             std::cout << std::format("Could not activate activity [{}]", last_activity);
         }
@@ -200,9 +177,9 @@ struct UI final : RendererUI
             return;
         }
 
-        activity_container->getButton(current_activity)->deactivate();
+        buttons[current_activity]->deactivate();
         current_activity = activity_idx;
-        activity_container->getButton(current_activity)->activate();
+        buttons[current_activity]->activate();
         history.addEntry(Date::now(), current_activity);
     }
 };

@@ -8,7 +8,7 @@
 
 struct SlotInfo final : sf::Transformable, sf::Drawable
 {
-    static Vec2f constexpr s_size{300.0f, 200.0f};
+    static Vec2f constexpr s_size{300.0f, 160.0f};
 
     std::vector<Activity> const* activities;
 
@@ -50,38 +50,45 @@ struct SlotInfo final : sf::Transformable, sf::Drawable
 
         float const margin{2.0f * ui::element_spacing};
 
-        sf::Text text{font, (*activities)[current_hover.activity_idx].name, ui::info_box_value_size};
+        Activity const& current_activity = (*activities)[current_hover.activity_idx];
+
+        sf::Text text{font, current_activity.name, ui::info_box_title_size};
         ui::setOrigin(text, ui::origin::Mode::TopCenter);
         text.setPosition({s_size.x * 0.5f, margin});
         target.draw(text, states);
 
         text.setCharacterSize(ui::info_box_value_size);
+        text.setFillColor(current_activity.color);
         {
             text.setString("00:00:00");
             auto const bounds = text.getLocalBounds();
-            text.setFillColor(sf::Color::White);
             text.setString(timeToString(current_hover.end_time - current_hover.start_time));
             text.setOrigin(bounds.position + bounds.size * 0.5f);
         }
+        states.blendMode = current_hover.activity_idx == 0 ? sf::BlendAdd : sf::BlendAlpha;
         text.setPosition(s_size * 0.5f);
         target.draw(text, states);
 
+        states.blendMode = sf::BlendAlpha;
         text.setCharacterSize(ui::info_box_small_size);
+        text.setFillColor(pez::setAlpha(sf::Color::White, 150));
+
         {
             text.setString("00:00:00");
             auto const bounds = text.getLocalBounds();
-        }
-        text.setFillColor(pez::setAlpha(sf::Color::White, 150));
-        float const slot_times_y = s_size.y - bounds.size.y * slot_time_scale - margin;
-        text.setString(timeToString(current_hover.start_time));
-        text.setPosition({margin, slot_times_y});
-        text.setOrigin(bounds.position + Vec2f{0.0f, bounds.size.y * 0.5f});
-        target.draw(text, states);
+            float const slot_times_y = s_size.y - margin;
+            text.setPosition({margin, slot_times_y});
 
-        text.setString(timeToString(current_hover.end_time));
-        text.setPosition({s_size.x - margin, slot_times_y});
-        text.setOrigin(bounds.position + Vec2f{bounds.size.x, bounds.size.y * 0.5f});
-        target.draw(text, states);
+            text.setString(timeToString(current_hover.start_time));
+            text.setOrigin(bounds.position + Vec2f{0.0f, bounds.size.y});
+            target.draw(text, states);
+
+            text.setString(timeToString(current_hover.end_time));
+            text.setPosition({s_size.x - margin, slot_times_y});
+            text.setOrigin(bounds.position + Vec2f{bounds.size.x, bounds.size.y});
+            target.draw(text, states);
+        }
+
     }
 
     void setHover(DayOverviewBar::SlotHover const& hover, Vec2f const position_)

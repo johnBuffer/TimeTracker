@@ -67,7 +67,7 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
 
     void drawTitle(sf::RenderTarget& target, sf::RenderStates const& states) const
     {
-        sf::Text title{font_title, activity_label, 200};
+        sf::Text title{font_title, activity_label, 160};
         title.setScale(text_scale);
         title.setFillColor(pez::setAlpha(sf::Color::White, 200));
         {

@@ -8,7 +8,7 @@
 
 struct ActivityInfo final : sf::Transformable, sf::Drawable
 {
-    static Vec2f constexpr s_size{300.0f, 200.0f};
+    static Vec2f constexpr s_size{300.0f, 160.0f};
 
     std::vector<Activity> const* activities;
 
@@ -48,19 +48,34 @@ struct ActivityInfo final : sf::Transformable, sf::Drawable
         states.transform *= getTransform();
         target.draw(background, states);
 
-        float const margin{2.0f * ui::element_spacing};
+        float constexpr margin{2.0f * ui::element_spacing};
 
-        sf::Text text{font, (*activities)[current_hover.activity_idx].name, 32};
+        Activity const& current_activity = (*activities)[current_hover.activity_idx];
+        sf::Text text{font, current_activity.name, ui::info_box_title_size};
         ui::setOrigin(text, ui::origin::Mode::TopCenter);
         text.setPosition({s_size.x * 0.5f, margin});
         target.draw(text, states);
 
-        text.setCharacterSize(48);
+        text.setCharacterSize(ui::info_box_value_size);
+        text.setFillColor(current_activity.color);
         text.setString(std::format("{:.0f}%", current_hover.ratio * 100.0f));
-        auto const bounds = text.getLocalBounds();
-        text.setOrigin(bounds.position + bounds.size * 0.5f);
-        text.setPosition(s_size * 0.5f);
-        target.draw(text, states);
+        {
+            auto const bounds = text.getLocalBounds();
+            text.setOrigin(bounds.position + bounds.size * 0.5f);
+            text.setPosition(s_size * 0.5f);
+            target.draw(text, states);
+        }
+
+        text.setCharacterSize(ui::info_box_small_size);
+        text.setFillColor(pez::setAlpha(sf::Color::White, 150));
+        text.setString(timeToString(current_hover.duration));
+        {
+            auto const bounds = text.getLocalBounds();
+            text.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, bounds.size.y});
+            float const slot_times_y = s_size.y - margin;
+            text.setPosition({s_size.x * 0.5f, slot_times_y});
+            target.draw(text, states);
+        }
     }
 
     void setHover(TimeBar::ActivityHover const& hover, Vec2f const position_)
