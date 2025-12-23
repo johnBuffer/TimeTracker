@@ -14,6 +14,8 @@
 #include "./day_overview_bar.hpp"
 #include "./time_bar.hpp"
 #include "./slot_info.hpp"
+#include "./activity_info.hpp"
+
 
 using EntitiesUI = pez::RequiredEntity<>;
 using ProcessorsUI = pez::RequiredSystems<>;
@@ -40,7 +42,9 @@ struct UI final : RendererUI
 
     ActivityContainer::Ptr activity_container;
     size_t current_activity{0};
+
     SlotInfo slot_info;
+    ActivityInfo activity_info;
 
     Blur background_blur;
 
@@ -48,6 +52,7 @@ struct UI final : RendererUI
         : RendererUI{render_size_, store_}
         , font{getFontMedium()}
         , slot_info{font, configuration.activities}
+        , activity_info{font, configuration.activities}
         , background_blur{Vec2u{render_size_}}
     {
         // Create the root widget, parent of all widgets
