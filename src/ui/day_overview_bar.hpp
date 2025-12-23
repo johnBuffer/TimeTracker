@@ -10,7 +10,7 @@ struct DayOverviewBar final : ui::Widget
     struct SlotHover
     {
         size_t activity_idx{};
-        float  slot_position_x{};
+        float  x{};
         float  start_time{};
         float  end_time{};
     };

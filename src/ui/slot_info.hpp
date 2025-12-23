@@ -50,23 +50,27 @@ struct SlotInfo final : sf::Transformable, sf::Drawable
 
         float const margin{2.0f * ui::element_spacing};
 
-        sf::Text text{font, (*activities)[current_hover.activity_idx].name, 32};
+        sf::Text text{font, (*activities)[current_hover.activity_idx].name, ui::info_box_value_size};
         ui::setOrigin(text, ui::origin::Mode::TopCenter);
         text.setPosition({s_size.x * 0.5f, margin});
         target.draw(text, states);
 
-        text.setCharacterSize(48);
-        text.setString("00:00:00");
-        auto const bounds = text.getLocalBounds();
-
-        text.setFillColor(sf::Color::White);
-        text.setString(timeToString(current_hover.end_time - current_hover.start_time));
-        text.setOrigin(bounds.position + bounds.size * 0.5f);
+        text.setCharacterSize(ui::info_box_value_size);
+        {
+            text.setString("00:00:00");
+            auto const bounds = text.getLocalBounds();
+            text.setFillColor(sf::Color::White);
+            text.setString(timeToString(current_hover.end_time - current_hover.start_time));
+            text.setOrigin(bounds.position + bounds.size * 0.5f);
+        }
         text.setPosition(s_size * 0.5f);
         target.draw(text, states);
 
-        float const slot_time_scale = 0.5f;
-        text.setScale({slot_time_scale, slot_time_scale});
+        text.setCharacterSize(ui::info_box_small_size);
+        {
+            text.setString("00:00:00");
+            auto const bounds = text.getLocalBounds();
+        }
         text.setFillColor(pez::setAlpha(sf::Color::White, 150));
         float const slot_times_y = s_size.y - bounds.size.y * slot_time_scale - margin;
         text.setString(timeToString(current_hover.start_time));
@@ -82,7 +86,7 @@ struct SlotInfo final : sf::Transformable, sf::Drawable
 
     void setHover(DayOverviewBar::SlotHover const& hover, Vec2f const position_)
     {
-        if (hover.slot_position_x != current_hover.slot_position_x) {
+        if (hover.x != current_hover.x) {
             position.setValueDirect(position_);
             current_hover = hover;
             setVisible(true);
@@ -97,7 +101,7 @@ struct SlotInfo final : sf::Transformable, sf::Drawable
         if (visible) {
             scale = 1.0f;
         } else {
-            current_hover.slot_position_x = 0.0f;
+            current_hover.x = 0.0f;
             scale = 0.0f;
         }
     }

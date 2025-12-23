@@ -18,30 +18,6 @@ inline pez::CardOutlined createBackground(Vec2f const size)
     return card;
 }
 
-[[nodiscard]]
-inline sf::Text createTitle(sf::Font const& font, std::string const& str)
-{
-    sf::Text text{font, str, title_size};
-    text.setFillColor(title_color);
-    return text;
-}
-
-[[nodiscard]]
-inline sf::Text createSubtitle(sf::Font const& font, std::string const& str)
-{
-    sf::Text text{font, str, subtitle_size};
-    text.setFillColor(subtitle_color);
-    return text;
-}
-
-[[nodiscard]]
-inline sf::Text createValue(sf::Font const& font, std::string const& str)
-{
-    sf::Text text{font, str, value_size};
-    text.setFillColor(value_color);
-    return text;
-}
-
 inline void setOrigin(sf::Text& text, origin::Mode const mode)
 {
     auto const bounds = text.getLocalBounds();

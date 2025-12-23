@@ -12,12 +12,12 @@ Vec2f constexpr outline_vec{outline_thickness, outline_thickness};
 sf::Color constexpr background_color = {150, 150, 150};
 sf::Color constexpr outline_color = {255, 255, 255};
 
-size_t constexpr title_size{24};
-sf::Color constexpr title_color = {200, 200, 200};
 size_t constexpr subtitle_size{20};
 sf::Color constexpr subtitle_color = {50, 50, 50, 150};
-size_t constexpr value_size{42};
-sf::Color constexpr value_color = {250, 250, 250, 200};
+
+size_t constexpr info_box_title_size = 32;
+size_t constexpr info_box_value_size = 48;
+size_t constexpr info_box_small_size = 24;
 
 float constexpr margin = 40.0f;
 float constexpr element_spacing = 10.0f;

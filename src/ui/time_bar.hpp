@@ -20,6 +20,7 @@ struct TimeBar final : ui::Widget
         size_t activity_idx{};
         float  duration{};
         float  ratio{};
+        float  x{};
     };
 
     using Ptr = std::shared_ptr<TimeBar>;
@@ -97,13 +98,18 @@ struct TimeBar final : ui::Widget
         checkActivity(pos.x);
     }
 
+    void onMouseExit() override
+    {
+        activity_hover = {};
+    }
+
     void checkActivity(float const x)
     {
         size_t const activity_count = info.size();
         for (size_t i{0}; i < activity_count; ++i) {
             auto const& a = info[i];
             if (x > a.x && x < a.x + a.width) {
-                activity_hover = {a.activity_idx, a.duration, a.ratio};
+                activity_hover = {a.activity_idx, a.duration, a.ratio, x};
                 return;
             }
         }

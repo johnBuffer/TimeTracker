@@ -3,7 +3,7 @@
 #include "standard/widget.hpp"
 
 #include "./ui_common.hpp"
-#include "./day_overview_bar.hpp"
+#include "./time_bar.hpp"
 
 
 struct ActivityInfo final : sf::Transformable, sf::Drawable
@@ -19,7 +19,7 @@ struct ActivityInfo final : sf::Transformable, sf::Drawable
     pez::InterpolatedFloat scale;
     bool visible = false;
 
-    DayOverviewBar::SlotHover current_hover;
+    TimeBar::ActivityHover current_hover;
 
     explicit
     ActivityInfo(sf::Font const& font_, std::vector<Activity> const& activities_)
@@ -56,13 +56,16 @@ struct ActivityInfo final : sf::Transformable, sf::Drawable
         target.draw(text, states);
 
         text.setCharacterSize(48);
-        text.setString("00:00:00");
+        text.setString(std::format("{:.0f}%", current_hover.ratio * 100.0f));
         auto const bounds = text.getLocalBounds();
+        text.setOrigin(bounds.position + bounds.size * 0.5f);
+        text.setPosition(s_size * 0.5f);
+        target.draw(text, states);
     }
 
-    void setHover(DayOverviewBar::SlotHover const& hover, Vec2f const position_)
+    void setHover(TimeBar::ActivityHover const& hover, Vec2f const position_)
     {
-        if (hover.slot_position_x != current_hover.slot_position_x) {
+        if (hover.x != current_hover.x) {
             position.setValueDirect(position_);
             current_hover = hover;
             setVisible(true);
@@ -77,7 +80,7 @@ struct ActivityInfo final : sf::Transformable, sf::Drawable
         if (visible) {
             scale = 1.0f;
         } else {
-            current_hover.slot_position_x = 0.0f;
+            current_hover.x = 0.0f;
             scale = 0.0f;
         }
     }

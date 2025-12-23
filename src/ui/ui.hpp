@@ -74,15 +74,15 @@ struct UI final : RendererUI
 
         sf::RenderStates states;
 
-        if (slot_info.scale > 0.0f) {
+        if (slot_info.scale > 0.0f || activity_info.scale > 0.0f) {
             auto const& blur_texture = background_blur.apply(context);
             states.texture = &blur_texture;
         }
 
         if (day_overview_bar->slot_hover) {
-            auto const& hover = *day_overview_bar->slot_hover;
+            auto const& hover = *(day_overview_bar->slot_hover);
             float const day_height = day_overview_bar->size->y;
-            Vec2f const slot_position = day_overview_bar->getPosition() + Vec2f{hover.slot_position_x, day_height - ui::element_spacing};
+            Vec2f const slot_position = day_overview_bar->getPosition() + Vec2f{hover.x, day_height - ui::element_spacing};
             Vec2f const info_position = slot_position + Vec2f{0.0f, 2.0f * ui::element_spacing};
             slot_info.setHover(hover, info_position);
         } else {
@@ -90,6 +90,18 @@ struct UI final : RendererUI
         }
         slot_info.update();
         context.draw(slot_info, states);
+
+        if (time_bar_global->activity_hover) {
+            auto const& hover = *(time_bar_global->activity_hover);
+            float const day_height = time_bar_global->size->y;
+            Vec2f const slot_position = time_bar_global->getPosition() + Vec2f{hover.x, day_height - ui::element_spacing};
+            Vec2f const info_position = slot_position + Vec2f{0.0f, 2.0f * ui::element_spacing};
+            activity_info.setHover(hover, info_position);
+        } else {
+            activity_info.setVisible(false);
+        }
+        activity_info.update();
+        context.draw(activity_info, states);
     }
 
     void initializeUI()
