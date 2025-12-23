@@ -30,10 +30,8 @@ struct UI final : RendererUI
 
     sf::Font const& font;
 
-    ui::Widget::Ptr root{nullptr};
-
-    TextLabel::Ptr timer_label;
-    TextLabel::Ptr day_overview_label;
+    ui::Widget::Ptr root;
+    TextLabel::Ptr time_label;
     TimeBar::Ptr time_bar_global;
     DayOverviewBar::Ptr day_overview_bar;
 
@@ -67,6 +65,7 @@ struct UI final : RendererUI
     void render(pez::RenderContext& context) override
     {
         root->update(pez::App::getDt());
+        time_label->setString(timeToString(Date::now().getTimeAsSeconds()));
         context.draw(*root);
 
         sf::RenderStates states;
@@ -108,13 +107,21 @@ struct UI final : RendererUI
 
         float current_y = ui::margin;
 
+        time_label = root->createChild<TextLabel>(getFontMedium());
+        time_label->setPosition({m_render_size.x * 0.5f, current_y});
+        time_label->setString("00:00:00");
+        time_label->setCharacterSize(120);
+        time_label->setOrigin({time_label->size->x * 0.5f, 0.0f});
+        time_label->setFillColor(pez::setAlpha(sf::Color::White, 200));
+        current_y += 1.5f * ui::margin + time_label->size->y;
+
         day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
         day_overview_bar->setPosition({ui::margin, current_y});
         current_y += 1.0f * ui::margin + time_bar_height;
 
         time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, configuration.activities);
         time_bar_global->setPosition({ui::margin, current_y});
-        current_y += 1.0f * ui::margin + time_bar_height;
+        current_y += 1.5f * ui::margin + time_bar_height;
 
         Vec2f const activity_container_size = {
             m_render_size.x - 2.0f * ui::margin,

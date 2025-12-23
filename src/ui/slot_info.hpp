@@ -58,18 +58,15 @@ struct SlotInfo final : sf::Transformable, sf::Drawable
         target.draw(text, states);
 
         text.setCharacterSize(ui::info_box_value_size);
-        text.setFillColor(current_activity.color);
+        text.setFillColor(current_hover.activity_idx > 0 ? current_activity.color : sf::Color{220, 220, 220});
         {
             text.setString("00:00:00");
             auto const bounds = text.getLocalBounds();
             text.setString(timeToString(current_hover.end_time - current_hover.start_time));
             text.setOrigin(bounds.position + bounds.size * 0.5f);
         }
-        states.blendMode = current_hover.activity_idx == 0 ? sf::BlendAdd : sf::BlendAlpha;
         text.setPosition(s_size * 0.5f);
         target.draw(text, states);
-
-        states.blendMode = sf::BlendAlpha;
         text.setCharacterSize(ui::info_box_small_size);
         text.setFillColor(pez::setAlpha(sf::Color::White, 150));
 
