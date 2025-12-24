@@ -102,10 +102,14 @@ struct UI final : RendererUI
 
     void initializeUI()
     {
-        size_t const activity_count = configuration.activities.size();
-        Vec2f const time_bar_size{m_render_size.x - 2.0f * ui::margin, time_bar_height};
+        float const ui_scale = m_render_size.y / 1080.0f;
+        float const margin = ui_scale * ui::margin;
 
-        float current_y = ui::margin;
+        float const time_bar_height_scaled = ui_scale * time_bar_height;
+        size_t const activity_count = configuration.activities.size();
+        Vec2f const time_bar_size{m_render_size.x - 2.0f * margin, time_bar_height_scaled};
+
+        float current_y = margin;
 
         time_label = root->createChild<TextLabel>(getFontMedium());
         time_label->setPosition({m_render_size.x * 0.5f, current_y});
@@ -113,31 +117,33 @@ struct UI final : RendererUI
         time_label->setCharacterSize(120);
         time_label->setOrigin({time_label->size->x * 0.5f, 0.0f});
         time_label->setFillColor(pez::setAlpha(sf::Color::White, 200));
-        current_y += 1.5f * ui::margin + time_label->size->y;
+        time_label->setScale({ui_scale, ui_scale});
+        current_y += 1.5f * margin + time_label->getEffectiveSize().y;
 
         day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
-        day_overview_bar->setPosition({ui::margin, current_y});
-        current_y += 1.0f * ui::margin + time_bar_height;
+        day_overview_bar->setPosition({margin, current_y});
+        current_y += 1.0f * margin + time_bar_height_scaled;
 
         time_bar_global = root->createChild<TimeBar>(font, time_bar_size, history, configuration.activities);
-        time_bar_global->setPosition({ui::margin, current_y});
-        current_y += 1.5f * ui::margin + time_bar_height;
+        time_bar_global->setPosition({margin, current_y});
+        current_y += 1.5f * margin + time_bar_height_scaled;
 
         Vec2f const activity_container_size = {
-            m_render_size.x - 2.0f * ui::margin,
-            m_render_size.y - ui::margin - current_y
+            m_render_size.x - 2.0f * margin,
+            m_render_size.y - margin - current_y
         };
         auto const activity_container = root->createChild<Container>(activity_container_size);
-        activity_container->setPosition({ui::margin, current_y});
+        activity_container->background.setRadius(ui::background_radius + margin);
+        activity_container->setPosition({margin, current_y});
 
         auto const activity_count_f = static_cast<float>(activity_count);
-        float const activity_height = activity_container_size.y - 2.0f * ui::margin;
-        float const activity_width = (activity_container_size.x - ui::margin * (activity_count_f + 1.0f)) / activity_count_f;
+        float const activity_height = activity_container_size.y - 2.0f * margin;
+        float const activity_width = (activity_container_size.x - margin * (activity_count_f + 1.0f)) / activity_count_f;
         Vec2f const activity_size = {activity_width, activity_height};
         for (size_t i = 0; i < activity_count; ++i) {
             auto const activity_button = activity_container->createChild<ActivityButton>(m_resources, activity_size, i, history);
-            float const x = ui::margin + static_cast<float>(i) * (activity_width + ui::margin);
-            activity_button->setPosition({x, ui::margin});
+            float const x = margin + static_cast<float>(i) * (activity_width + margin);
+            activity_button->setPosition({x, margin});
             activity_button->on_activate = [this, i] {
                 activate(i);
             };
