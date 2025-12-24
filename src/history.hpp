@@ -172,7 +172,7 @@ struct History
         }
 
         TimePoint result;
-        result.date = Date{data[0], static_cast<uint32_t>(data[1]), static_cast<uint32_t>(data[2]), data[3], data[4], data[5], 0};
+        result.date = Date{data[0], data[1], data[2], data[3], data[4], data[5], 0};
         result.activity_idx = data[6];
         return result;
     }
