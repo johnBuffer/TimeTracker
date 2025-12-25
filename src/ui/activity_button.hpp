@@ -12,6 +12,8 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
     static float constexpr text_scale_f = 0.3f;
     static Vec2f constexpr text_scale   = {text_scale_f, text_scale_f};
 
+    ui::Data const& data = pez::Singleton<ui::Data>::get();
+
     std::string activity_label;
 
     sf::Font const& font_title;
@@ -67,8 +69,9 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
 
     void drawTitle(sf::RenderTarget& target, sf::RenderStates const& states) const
     {
+        Vec2f const scale = data.getScaled(text_scale);
         sf::Text title{font_title, activity_label, 160};
-        title.setScale(text_scale);
+        title.setScale(scale);
         title.setFillColor(pez::setAlpha(sf::Color::White, 200));
         {
             auto const bounds = title.getLocalBounds();
@@ -78,7 +81,7 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
         target.draw(title, states);
 
         sf::Text percent_label{font_timer, std::format("{:.0f}%", percent), 100};
-        percent_label.setScale(text_scale);
+        percent_label.setScale(scale);
         percent_label.setFillColor(pez::setAlpha(sf::Color::White, 200));
         {
             auto const bounds = percent_label.getLocalBounds();
@@ -91,7 +94,7 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
     void drawDuration(sf::RenderTarget& target, sf::RenderStates const& states) const
     {
         sf::Text text{font_timer, "00:00:00", 150};
-        text.setScale(text_scale);
+        text.setScale(data.getScaled(text_scale));
         text.setFillColor(pez::setAlpha(sf::Color::White, 150));
         auto const bounds = text.getLocalBounds();
         text.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, 0.0f});
@@ -113,6 +116,8 @@ struct ActivityButton final : ui::Widget
         Active,
         Idle,
     };
+
+    ui::Data const& data = pez::Singleton<ui::Data>::get();
 
     // State
     State  state = State::Idle;
@@ -188,11 +193,11 @@ struct ActivityButton final : ui::Widget
 
     void onDraw(sf::RenderTarget& target, sf::RenderStates const states) const override
     {
-        float constexpr led_radius = 10.0f;
-        float constexpr led_offset = 40.0f;
+        float const led_radius = data.getScaled(10.0f);
+        float const led_offset = data.getScaled(40.0f);
 
         sf::Text text{font, "Active", 150};
-        text.setScale(ActivityBackground::text_scale);
+        text.setScale(data.getScaled(ActivityBackground::text_scale));
         auto const bounds = text.getLocalBounds();
         text.setOrigin(bounds.position + bounds.size * 0.5f);
 
@@ -203,8 +208,8 @@ struct ActivityButton final : ui::Widget
 
         pez::Card led{2.0f * Vec2f{led_radius, led_radius}, led_radius, sf::Color::Green};
         led.shadow_color = sf::Color::Green;
-        led.setShadowSize(16.0f);
-        led.setPosition(text.getPosition() - Vec2f{bounds.size.x * ActivityBackground::text_scale_f * 0.5f + led_offset, 8.0f});
+        led.setShadowSize(data.getScaled(16.0f));
+        led.setPosition(text.getPosition() - Vec2f{bounds.size.x * data.getScaled(ActivityBackground::text_scale_f) * 0.5f + led_offset, 8.0f});
         target.draw(led, states);
 
         target.draw(background, states);

@@ -2,7 +2,7 @@
 #include "standard/widget.hpp"
 
 #include "./ui_common.hpp"
-#include "./activity_button.hpp"
+#include "./ui_data.hpp"
 
 
 struct Container final : ui::Widget
@@ -16,7 +16,8 @@ struct Container final : ui::Widget
         : ui::Widget{size_}
         , background{ui::createBackground(size_)}
     {
-        background.background.setCornerRadius(ui::background_radius + ui::margin);
+        auto const& data = pez::Singleton<ui::Data>::get();
+        background.background.setCornerRadius(data.getScaled(ui::background_radius + ui::margin));
         background.setFillColor({150, 150, 150});
     }
 

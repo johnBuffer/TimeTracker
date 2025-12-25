@@ -1,7 +1,7 @@
 #pragma once
 #include "peztool/utils/render/card/card_outlined.hpp"
 
-#include "./ui_configuration.hpp"
+#include "./ui_data.hpp"
 #include "standard/widget.hpp"
 
 namespace ui
@@ -9,11 +9,12 @@ namespace ui
 [[nodiscard]]
 inline pez::CardOutlined createBackground(Vec2f const size)
 {
+    auto const& data = pez::Singleton<ui::Data>::get();
     pez::CardOutlined card{size, background_radius, outline_thickness, background_color};
     card.setOutlineShadowSize(0);
-    card.setBackgroundShadowSize(background_shadow);
+    card.setBackgroundShadowSize(data.getScaled(ui::background_shadow));
     card.background.blur_background = false;
-    card.background.shadow_offset = {0.0f, 7.0f};
+    card.background.shadow_offset = {0.0f, data.getScaled(7.0f)};
     card.setOutlineColor(outline_color);
     return card;
 }
