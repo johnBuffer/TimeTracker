@@ -1,11 +1,5 @@
 #pragma once
 
-#include "./activity_button.hpp"
-#include "./activity_info.hpp"
-#include "./container.hpp"
-#include "./day_overview_bar.hpp"
-#include "./slot_info.hpp"
-#include "./time_bar.hpp"
 #include "configuration.hpp"
 #include "peztool/core/system.hpp"
 #include "peztool/utils/render/blur/blur.hpp"
@@ -13,6 +7,13 @@
 #include "standard/drawer.hpp"
 #include "standard/text_label.hpp"
 
+#include "./ui_data.hpp"
+#include "./activity_button.hpp"
+#include "./activity_info.hpp"
+#include "./container.hpp"
+#include "./day_overview_bar.hpp"
+#include "./slot_info.hpp"
+#include "./time_bar.hpp"
 
 using EntitiesUI = pez::RequiredEntity<>;
 using ProcessorsUI = pez::RequiredSystems<>;
@@ -50,6 +51,8 @@ struct UI final : RendererUI
         , activity_info{font, configuration.activities}
         , background_blur{Vec2u{render_size_}}
     {
+        pez::Singleton<ui::Data>::create();
+
         // Create the root widget, parent of all widgets
         root = std::make_shared<ui::Widget>(m_render_size);
         // Initialize blur shaders
@@ -102,10 +105,12 @@ struct UI final : RendererUI
 
     void initializeUI()
     {
-        float const ui_scale = m_render_size.y / 1080.0f;
-        float const margin = ui_scale * ui::margin;
+        ui::Data& data = pez::Singleton<ui::Data>::get();
+        data.scale = m_render_size.y / 1080.0f;
 
-        float const time_bar_height_scaled = ui_scale * time_bar_height;
+        float const margin = data.getScaled(ui::margin);
+
+        float const time_bar_height_scaled = data.getScaled(time_bar_height);
         size_t const activity_count = configuration.activities.size();
         Vec2f const time_bar_size{m_render_size.x - 2.0f * margin, time_bar_height_scaled};
 
@@ -117,7 +122,7 @@ struct UI final : RendererUI
         time_label->setCharacterSize(120);
         time_label->setOrigin({time_label->size->x * 0.5f, 0.0f});
         time_label->setFillColor(pez::setAlpha(sf::Color::White, 200));
-        time_label->setScale({ui_scale, ui_scale});
+        time_label->setScale(data.getScaleVec());
         current_y += 1.5f * margin + time_label->getEffectiveSize().y;
 
         day_overview_bar = root->createChild<DayOverviewBar>(time_bar_size, history, configuration.activities);
