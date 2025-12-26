@@ -94,7 +94,7 @@ struct ActivityBackground : public sf::Transformable, public sf::Drawable
     void drawDuration(sf::RenderTarget& target, sf::RenderStates const& states) const
     {
         sf::Text text{font_timer, "00:00:00", 150};
-        text.setScale(data.getScaled(text_scale));
+        text.setScale(text_scale);
         text.setFillColor(pez::setAlpha(sf::Color::White, 150));
         auto const bounds = text.getLocalBounds();
         text.setOrigin(bounds.position + Vec2f{bounds.size.x * 0.5f, 0.0f});
@@ -183,7 +183,7 @@ struct ActivityButton final : ui::Widget
         float const offset = highlight_offset;
         Vec2f const background_size = *size;
         background.setPosition(background_size * 0.5f + Vec2f{0.0f, offset});
-        background.setShadowOffset({0.0f, 10.0f - offset});
+        background.setShadowOffset({0.0f, data.getScaled(10.0f) - offset});
         float const scale = highlight_scale;
         background.setScale({scale, scale});
 
@@ -255,7 +255,7 @@ struct ActivityButton final : ui::Widget
 private:
     void highlight()
     {
-        highlight_offset = -ui::margin * 0.25f;
+        highlight_offset = -data.getScaled(ui::margin) * 0.25f;
         highlight_scale = 1.02f;
     }
 
